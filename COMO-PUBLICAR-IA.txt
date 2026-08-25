@@ -1,0 +1,71 @@
+VENTUS TAG DEBUGGER v4.4
+IA PÚBLICA NO CLOUDFLARE WORKERS
+
+WINDOWS — FORMA MAIS SIMPLES
+
+1. Instale Node.js caso ainda não tenha.
+2. Dê dois cliques:
+   PUBLICAR-VENTUS-AI.bat
+
+3. Na primeira execução:
+   - o navegador pode abrir para login/autorização Cloudflare;
+   - autorize o Wrangler.
+
+4. O terminal vai pedir sua OPENAI_API_KEY.
+   Cole a chave e pressione ENTER.
+
+5. O script automaticamente:
+   - instala Wrangler;
+   - autentica na Cloudflare;
+   - cria o Worker ventus-ai;
+   - publica no workers.dev;
+   - salva OPENAI_API_KEY como Secret;
+   - publica a versão final;
+   - identifica a URL pública;
+   - atualiza ai-config.js;
+   - testa /health.
+
+6. No final você verá algo como:
+   https://ventus-ai.<seu-subdominio>.workers.dev/analyze
+
+7. Vá para:
+   chrome://extensions
+
+8. Clique em Recarregar no Ventus Tag Debugger.
+
+9. Abra a extensão.
+   O indicador deve mostrar:
+   IA online · gpt-5.6
+
+10. Clique em:
+    ✦ Analisar com IA
+
+
+SEGURANÇA
+
+A OPENAI_API_KEY NÃO é salva na extensão.
+Ela é registrada no Cloudflare como Secret.
+
+Os dados enviados pela extensão também passam por sanitização
+antes de serem enviados para a OpenAI.
+
+
+MAC / LINUX
+
+chmod +x PUBLICAR-VENTUS-AI.sh
+./PUBLICAR-VENTUS-AI.sh
+
+
+ARQUITETURA
+
+Ventus Tag Debugger
+        ↓
+https://ventus-ai.<conta>.workers.dev/analyze
+        ↓
+Cloudflare Worker
+        ↓
+OpenAI Responses API
+        ↓
+GPT-5.6
+        ↓
+Diagnóstico da tag

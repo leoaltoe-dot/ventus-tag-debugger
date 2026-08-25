@@ -1,0 +1,6 @@
+body{margin:0;font:12px Arial;background:#f5f7fb;color:#132238}
+header{height:54px;background:#0d1c32;color:#fff;display:flex;align-items:center;gap:9px;padding:0 12px}
+header img{width:34px;height:34px;border-radius:8px}header b{display:block}header span{font-size:10px;color:#aab7ca}
+#search{width:calc(100% - 20px);margin:10px;padding:8px;border:1px solid #dbe2ec;border-radius:6px}
+table{width:100%;border-collapse:collapse;background:white}th,td{padding:7px;border-bottom:1px solid #e9edf3;text-align:left}
+th{position:sticky;top:0;background:#eef2f6}

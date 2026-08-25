@@ -1,0 +1,75 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Ventus Tag Debugger</title><link rel="stylesheet" href="popup.css"></head><body>
+<header class="topbar"><div class="monitor"><span class="dot"></span>Monitorando</div><div class="brand">
+      <img src="logo.png" alt="Ventus">
+      <div class="brandText">
+        <h1>Ventus</h1>
+        <span>TAG DEBUGGER</span>
+      </div>
+      <div class="signatureWrap" aria-label="Assinatura Leonardo Altoé">
+        <span class="signatureBy">by</span>
+        <span class="signatureName">Leonardo Altoé</span>
+      </div>
+    </div><label class="ventusPower" title="Ligar ou desligar a captura">
+  <input id="ventusPowerToggle" type="checkbox" checked>
+  <span class="ventusPowerTrack"><span class="ventusPowerThumb"></span></span>
+  <span id="ventusPowerLabel" class="ventusPowerLabel">Ligado</span>
+</label>
+<span id="aiConnection" class="aiConnection offline" title="Status da IA">IA offline</span>
+    <button id="aiSettings" class="aiSettingsBtn" title="Configurar IA">⚙</button>
+    <button id="clear" class="clearBtn">🗑 Limpar</button></header>
+<nav class="mainTabs"><button class="mainTab active" data-view="eventsView">⌁ Eventos</button><button class="mainTab" data-view="dlView">▱ Data Layer</button><button class="mainTab" data-view="historyView">◷ Histórico</button></nav>
+<section id="eventsView" class="view active"><div class="eventWorkspace"><aside class="leftPane"><div id="stats" class="stats"></div><div class="searchWrap"><input id="searchLive" placeholder="Buscar evento, ID ou URL..."></div><div class="filters"><button class="filter active" data-filter="ALL">Todos</button><button class="filter" data-filter="GA4">GA4</button><button class="filter" data-filter="Meta">Meta</button><button class="filter" data-filter="Google Ads">Google Ads</button><button class="filter" data-filter="Floodlight">Floodlight</button><button class="filter" data-filter="GTM">GTM</button><button class="filter" data-filter="TikTok">TikTok</button><button class="filter" data-filter="Server Side">Server Side</button></div><div id="liveEvents" class="eventList"></div></aside><section id="detailPanel" class="detailPanel emptyDetail"><div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div></section></div></section>
+<section id="dlView" class="view"><div class="standaloneHead"><div><h2>Data Layer</h2><p>Eventos capturados em tempo real.</p></div><input id="searchDL" placeholder="Buscar event, transaction_id, item_id..."></div><div id="dlEvents" class="standaloneList"></div></section>
+<section id="historyView" class="view"><div class="historyLayout"><aside class="sitePane"><div class="sitePaneTitle">Sites capturados</div><input id="searchSite" placeholder="Buscar site..."><div id="siteList"></div></aside><section class="historyContent"><div class="historyHeader"><div><h2 id="historySiteTitle">Histórico</h2><p id="historySiteMeta">Selecione um site.</p></div><button id="clearSite" class="historyClear hidden">Limpar site</button></div><div id="historyStats" class="historyStats"></div><div id="historyEvents" class="historyTable"></div></section></div></section>
+
+  <div id="aiModal" class="aiModal hidden" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle">
+    <div class="aiModalCard">
+      <div class="aiModalHeader">
+        <div>
+          <div class="aiEyebrow">VENTUS AI</div>
+          <h2 id="aiModalTitle">Análise da tag</h2>
+          <p id="aiModalSubtitle">Validação de implementação e oportunidades de melhoria.</p>
+        </div>
+        <button id="aiModalClose" class="aiCloseBtn" type="button">×</button>
+      </div>
+
+      <div id="aiLoading" class="aiLoading hidden">
+        <div class="aiSpinner"></div>
+        <strong>Analisando tag...</strong>
+        <span>Verificando parâmetros, Data Layer, GTM, status e consistência.</span>
+      </div>
+
+      <div id="aiResult" class="aiResult"></div>
+    </div>
+  </div>
+
+  <div id="aiSettingsModal" class="aiModal hidden" role="dialog" aria-modal="true" aria-labelledby="aiSettingsTitle">
+    <div class="aiModalCard aiSettingsCard">
+      <div class="aiModalHeader">
+        <div>
+          <div class="aiEyebrow">CONFIGURAÇÃO</div>
+          <h2 id="aiSettingsTitle">Ventus AI</h2>
+          <p>Configure o endpoint do backend que fará a chamada de IA.</p>
+        </div>
+        <button id="aiSettingsClose" class="aiCloseBtn" type="button">×</button>
+      </div>
+
+      <label class="aiField">
+        <span>Endpoint da IA</span>
+        <input id="aiEndpoint" type="url" placeholder="http://localhost:8787/analyze">
+      </label>
+
+      <div class="aiPrivacyNote">
+        A extensão envia somente dados técnicos da tag. Headers sensíveis, cookies, authorization, e-mail e telefone são removidos antes do envio.
+      </div>
+
+      <div class="aiSettingsActions">
+        <button id="aiTest" class="aiSecondaryBtn" type="button">Testar conexão</button>
+        <button id="aiSave" class="aiPrimaryBtn" type="button">Salvar</button>
+      </div>
+      <div id="aiSettingsStatus" class="aiSettingsStatus"></div>
+    </div>
+  </div>
+
+  <script src="ai-config.js"></script>
+  <script src="popup.js"></script></body></html>

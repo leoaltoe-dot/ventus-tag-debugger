@@ -1,0 +1,1 @@
+chrome.devtools.panels.create("Ventus Tags", "icons/icon16.png", "panel.html");

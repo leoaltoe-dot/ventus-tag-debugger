@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ventus-ai",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-24",
+  "workers_dev": true,
+  "vars": {
+    "OPENAI_MODEL": "gpt-5.6"
+  }
+}
