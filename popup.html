@@ -1,22 +1,41 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Ventus Tag Debugger</title><link rel="stylesheet" href="popup.css"></head><body>
-<header class="topbar"><div class="monitor"><span class="dot"></span>Monitorando</div><div class="brand">
-      <img src="logo.png" alt="Ventus">
-      <div class="brandText">
-        <h1>Ventus</h1>
-        <span>TAG DEBUGGER</span>
-      </div>
-      <div class="signatureWrap" aria-label="Assinatura Leonardo Altoé">
-        <span class="signatureBy">by</span>
-        <span class="signatureName">Leonardo Altoé</span>
-      </div>
-    </div><label class="ventusPower" title="Ligar ou desligar a captura">
-  <input id="ventusPowerToggle" type="checkbox" checked>
-  <span class="ventusPowerTrack"><span class="ventusPowerThumb"></span></span>
-  <span id="ventusPowerLabel" class="ventusPowerLabel">Ligado</span>
-</label>
-<span id="aiConnection" class="aiConnection offline" title="Status da IA">IA offline</span>
-    <button id="aiSettings" class="aiSettingsBtn" title="Configurar IA">⚙</button>
-    <button id="clear" class="clearBtn">🗑 Limpar</button></header>
+<header class="topbar">
+  <div class="topbarLeft">
+    <div class="monitor"><span class="dot"></span><span class="monitorText">Monitorando</span></div>
+
+    <label class="ventusPower" title="Ligar ou desligar a captura">
+      <input id="ventusPowerToggle" type="checkbox" checked>
+      <span class="ventusPowerTrack"><span class="ventusPowerThumb"></span></span>
+      <span id="ventusPowerLabel" class="ventusPowerLabel">Ligado</span>
+    </label>
+  </div>
+
+  <div class="brand">
+    <img src="logo.png" alt="Ventus">
+    <div class="brandText">
+      <h1>Ventus</h1>
+      <span>TAG DEBUGGER</span>
+    </div>
+    <div class="signatureWrap" aria-label="Assinatura Leonardo Altoé">
+      <span class="signatureBy">by</span>
+      <span class="signatureName">Leonardo Altoé</span>
+    </div>
+  </div>
+
+  <div class="topbarRight">
+    <div class="topbarActions">
+      <button id="themeToggle" class="themeToggle" type="button" title="Mudar para modo escuro" aria-label="Mudar para modo escuro">
+        <span id="themeIcon">☾</span>
+      </button>
+      <button id="aiSettings" class="aiSettingsBtn" type="button" title="Configurar IA" aria-label="Configurar IA">⚙</button>
+      <span id="aiConnection" class="aiConnection offline" title="Status da IA">
+        <span class="aiConnectionDot" aria-hidden="true"></span>
+        <span class="aiConnectionText">IA offline</span>
+      </span>
+      <button id="clear" class="clearBtn" type="button" title="Limpar histórico" aria-label="Limpar histórico">🗑</button>
+    </div>
+  </div>
+</header>
 <nav class="mainTabs"><button class="mainTab active" data-view="eventsView">⌁ Eventos</button><button class="mainTab" data-view="dlView">▱ Data Layer</button><button class="mainTab" data-view="historyView">◷ Histórico</button></nav>
 <section id="eventsView" class="view active"><div class="eventWorkspace"><aside class="leftPane"><div id="stats" class="stats"></div><div class="searchWrap"><input id="searchLive" placeholder="Buscar evento, ID ou URL..."></div><div class="filters"><button class="filter active" data-filter="ALL">Todos</button><button class="filter" data-filter="GA4">GA4</button><button class="filter" data-filter="Meta">Meta</button><button class="filter" data-filter="Google Ads">Google Ads</button><button class="filter" data-filter="Floodlight">Floodlight</button><button class="filter" data-filter="GTM">GTM</button><button class="filter" data-filter="TikTok">TikTok</button><button class="filter" data-filter="Server Side">Server Side</button></div><div id="liveEvents" class="eventList"></div></aside><section id="detailPanel" class="detailPanel emptyDetail"><div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div></section></div></section>
 <section id="dlView" class="view"><div class="standaloneHead"><div><h2>Data Layer</h2><p>Eventos capturados em tempo real.</p></div><input id="searchDL" placeholder="Buscar event, transaction_id, item_id..."></div><div id="dlEvents" class="standaloneList"></div></section>

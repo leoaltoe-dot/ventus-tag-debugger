@@ -82,3 +82,48 @@ VENTUS v4.7
 - Botão pequeno para copiar status/erro em cada tag.
 - Copia plataforma, evento, ID, status, descrição do status, erro técnico, método, endpoint e transporte.
 - Feedback visual ✓ ao copiar.
+
+VENTUS v4.8
+- Botão claro/escuro no cabeçalho.
+- Tema aplicado ao popup, cards, histórico, detalhes e IA.
+- Preferência salva no Chrome e mantida entre sessões.
+
+VENTUS v4.9 — DARK THEME FIXED
+- Dark mode rebuilt with semantic palette instead of simple color overrides.
+- Separate dark colors for background, surfaces, cards, inputs, borders and text.
+- Platform colors preserved for GA4, Meta, Ads and Data Layer.
+- Status green/red/orange preserved with accessible contrast.
+- AI modal, history, details and Data Layer use dedicated dark surfaces.
+- Theme preference remains persisted in chrome.storage.local.
+
+VENTUS v5.0
+- Todos os botões reorganizados e padronizados visualmente.
+- Tabs e filtros com hierarquia consistente.
+- Erros/status associados pelo requestId do Chrome.
+- HTTP 4xx, HTTP 5xx e falhas de rede diferenciados.
+- Falhas de rede classificadas como blocked, cancelled, timeout ou network_error.
+- Duração até conclusão/falha armazenada no evento.
+
+VENTUS v5.1
+- Header reorganizado em uma única linha.
+- Monitoramento e liga/desliga permanecem dentro do cabeçalho.
+- Logo centralizada independentemente dos controles laterais.
+- Tema/configurações alinhados à direita.
+- Status da IA não empurra mais os controles para fora do header.
+- Layout compacto para popup estreito.
+
+VENTUS v5.2 — HEADER STRUCTURE FIX
+- Header refeito com três grupos reais no HTML:
+  esquerda = monitoramento + liga/desliga
+  centro = logo Ventus
+  direita = tema + IA + limpar + status da IA
+- Removido alinhamento baseado em margens artificiais.
+- Logo permanece centralizada mesmo com quantidades diferentes de controles laterais.
+- Controles permanecem dentro do cabeçalho no popup compacto.
+- Assinatura fica oculta apenas em larguras muito pequenas para preservar alinhamento.
+
+VENTUS v5.3
+- Status IA movido para a mesma linha dos controles do header.
+- Badge IA offline/online redesenhado como pill compacto com indicador de status.
+- Removida a segunda linha do bloco de ações.
+- Tema, configurações, IA e limpar permanecem alinhados horizontalmente.

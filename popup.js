@@ -627,6 +627,9 @@ function buildStatusCopyText(event) {
 
   if (event.error) {
     lines.push(`Erro técnico: ${event.error}`);
+    if (event.statusCategory) {
+      lines.push(`Categoria do erro: ${event.statusCategory}`);
+    }
   }
 
   if (event.method) {
@@ -682,4 +685,45 @@ function showCopyFeedback(button, message) {
     button.textContent = original || "⧉";
     button.classList.remove("copied", "copyError");
   }, 1200);
+}
+
+
+
+/* Ventus v4.9 — proper theme switching */
+const ventusThemeToggle=document.getElementById("themeToggle");
+const ventusThemeIcon=document.getElementById("themeIcon");
+
+function applyVentusTheme(theme){
+  const selected=theme==="dark"?"dark":"light";
+  document.documentElement.setAttribute("data-theme",selected);
+
+  if(ventusThemeIcon){
+    ventusThemeIcon.textContent=selected==="dark"?"☀":"☾";
+  }
+
+  if(ventusThemeToggle){
+    const label=selected==="dark"
+      ? "Mudar para modo claro"
+      : "Mudar para modo escuro";
+
+    ventusThemeToggle.title=label;
+    ventusThemeToggle.setAttribute("aria-label",label);
+  }
+}
+
+chrome.storage.local.get(["ventusTheme"],result=>{
+  applyVentusTheme(result.ventusTheme==="dark"?"dark":"light");
+});
+
+if(ventusThemeToggle){
+  ventusThemeToggle.addEventListener("click",()=>{
+    const current=document.documentElement.getAttribute("data-theme")==="dark"
+      ? "dark"
+      : "light";
+
+    const next=current==="dark"?"light":"dark";
+
+    applyVentusTheme(next);
+    chrome.storage.local.set({ventusTheme:next});
+  });
 }

@@ -647,3 +647,1119 @@ body.ventusPaused .dot{background:#f59e0b;box-shadow:0 0 0 5px rgba(245,158,11,.
   border-color:#ffcaca;
   color:#dc2626;
 }
+
+
+
+/* ==========================================================
+   Ventus v4.9 — Real Light / Dark Theme
+   ========================================================== */
+
+:root{
+  --vt-bg:#f5f7fb;
+  --vt-surface:#ffffff;
+  --vt-surface-2:#f8fafc;
+  --vt-surface-3:#eef3f8;
+  --vt-border:#dbe3ee;
+  --vt-border-strong:#c8d4e3;
+
+  --vt-text:#132238;
+  --vt-text-2:#42526a;
+  --vt-muted:#748399;
+  --vt-faint:#94a3b8;
+
+  --vt-topbar:#0d1c32;
+  --vt-topbar-2:#071426;
+  --vt-topbar-text:#ffffff;
+
+  --vt-blue:#1769e8;
+  --vt-blue-soft:#eaf2ff;
+  --vt-green:#15803d;
+  --vt-green-soft:#eaf8ef;
+  --vt-purple:#7c3aed;
+  --vt-purple-soft:#f3eaff;
+  --vt-orange:#ea580c;
+  --vt-orange-soft:#fff1e8;
+  --vt-red:#dc2626;
+  --vt-red-soft:#fff0f0;
+  --vt-yellow:#a16207;
+  --vt-yellow-soft:#fff8df;
+
+  --vt-code-bg:#0f1a2a;
+  --vt-code-text:#e8eff9;
+
+  --vt-shadow:0 8px 28px rgba(15,23,42,.12);
+}
+
+html[data-theme="dark"]{
+  color-scheme:dark;
+
+  --vt-bg:#08111f;
+  --vt-surface:#0f1b2d;
+  --vt-surface-2:#132238;
+  --vt-surface-3:#1a2a41;
+  --vt-border:#263a55;
+  --vt-border-strong:#35506f;
+
+  --vt-text:#eef4fb;
+  --vt-text-2:#c7d4e4;
+  --vt-muted:#9aacbf;
+  --vt-faint:#74869e;
+
+  --vt-topbar:#050d18;
+  --vt-topbar-2:#071426;
+  --vt-topbar-text:#f8fbff;
+
+  --vt-blue:#6da8ff;
+  --vt-blue-soft:#142d4d;
+  --vt-green:#65d98d;
+  --vt-green-soft:#123321;
+  --vt-purple:#b497ff;
+  --vt-purple-soft:#2d2145;
+  --vt-orange:#ff9a52;
+  --vt-orange-soft:#3b2518;
+  --vt-red:#ff7f8c;
+  --vt-red-soft:#3c191e;
+  --vt-yellow:#f3c969;
+  --vt-yellow-soft:#3a3117;
+
+  --vt-code-bg:#06101d;
+  --vt-code-text:#e7eef8;
+
+  --vt-shadow:0 14px 34px rgba(0,0,0,.32);
+}
+
+/* Canvas */
+html,
+body{
+  background:var(--vt-bg) !important;
+  color:var(--vt-text) !important;
+}
+
+/* Header / brand */
+.topbar,
+header.topbar{
+  background:linear-gradient(90deg,var(--vt-topbar-2),var(--vt-topbar)) !important;
+  color:var(--vt-topbar-text) !important;
+  border-color:var(--vt-border) !important;
+}
+.brand h1{color:var(--vt-topbar-text) !important}
+.brand span,
+.signatureBy,
+.signatureName{color:#c8d4e4 !important}
+
+/* Main navigation */
+.mainTabs,
+.main-tabs,
+nav.mainTabs,
+nav.main-tabs{
+  background:var(--vt-surface) !important;
+  border-color:var(--vt-border) !important;
+}
+.mainTab,
+.main-tabs .tab{
+  background:var(--vt-surface) !important;
+  color:var(--vt-text-2) !important;
+  border-color:var(--vt-border) !important;
+}
+.mainTab.active,
+.main-tabs .tab.active{
+  color:var(--vt-blue) !important;
+}
+.mainTab.active:after,
+.main-tabs .tab.active:after{
+  background:var(--vt-blue) !important;
+}
+
+/* Primary panes */
+.leftPane,
+.detailPanel,
+.historyContent,
+.historyPane,
+.view,
+.historyPane,
+.standaloneList{
+  background:var(--vt-bg) !important;
+  color:var(--vt-text) !important;
+  border-color:var(--vt-border) !important;
+}
+.detailPanel,
+.historyContent{
+  background:var(--vt-surface) !important;
+}
+
+/* Surfaces / cards */
+.stat,
+.eventCard,
+.siteItem,
+.infoBox,
+.miniStat,
+.aiModalCard,
+.aiSettingsCard,
+.aiScore,
+.aiFinding,
+.kvTable,
+.historyRow.header{
+  background:var(--vt-surface) !important;
+  color:var(--vt-text) !important;
+  border-color:var(--vt-border) !important;
+}
+.eventCard:hover,
+.siteItem:hover{
+  border-color:var(--vt-border-strong) !important;
+}
+.eventCard.selected{
+  outline-color:var(--vt-blue) !important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--vt-blue) 18%,transparent) !important;
+}
+
+/* Secondary surfaces */
+.filters,
+.toolbar,
+.searchWrap,
+.searchRow,
+.standaloneHead,
+.historyHeader,
+.detailHeader,
+.detailTabs,
+.tabs,
+.aiModalHeader{
+  background:var(--vt-surface) !important;
+  border-color:var(--vt-border) !important;
+  color:var(--vt-text) !important;
+}
+.sitePane,
+.sitesPane{
+  background:var(--vt-surface-3) !important;
+  border-color:var(--vt-border) !important;
+}
+
+/* Typography */
+.cardTitle,
+.eventTitle,
+.detailTitle,
+.blockTitle,
+.sectionHead h2,
+.standaloneHead h2,
+.historyHeader h2,
+.aiModalHeader h2,
+.aiSection h3,
+.aiScore h3,
+.siteHost,
+.infoBox .v,
+.kvRow .key{
+  color:var(--vt-text) !important;
+}
+.cardSub,
+.eventSub,
+.meta,
+.time,
+.sectionHead p,
+.standaloneHead p,
+.historyHeader p,
+.siteMeta,
+.infoBox .k,
+.detailSub,
+.aiModalHeader p,
+.aiFindingText,
+.aiScore p,
+.muted,
+.historySiteMeta{
+  color:var(--vt-muted) !important;
+}
+
+/* Inputs */
+input,
+select,
+textarea,
+#search,
+#searchLive,
+#searchDL,
+#searchSite,
+#aiEndpoint{
+  background:var(--vt-surface-2) !important;
+  color:var(--vt-text) !important;
+  border-color:var(--vt-border-strong) !important;
+}
+input::placeholder,
+textarea::placeholder{
+  color:var(--vt-faint) !important;
+}
+input:focus,
+select:focus,
+textarea:focus{
+  border-color:var(--vt-blue) !important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--vt-blue) 18%,transparent) !important;
+}
+
+/* Normal buttons */
+.filter,
+.ghost,
+.clearBtn,
+.historyClear,
+.aiSettingsBtn,
+.themeToggle,
+.copyStatusBtn,
+.detailClose,
+.aiCloseBtn,
+.aiSecondaryBtn{
+  background:var(--vt-surface-2) !important;
+  color:var(--vt-text-2) !important;
+  border-color:var(--vt-border-strong) !important;
+}
+.filter:hover,
+.ghost:hover,
+.aiSettingsBtn:hover,
+.themeToggle:hover,
+.copyStatusBtn:hover,
+.detailClose:hover,
+.aiCloseBtn:hover,
+.aiSecondaryBtn:hover{
+  background:var(--vt-surface-3) !important;
+  color:var(--vt-blue) !important;
+  border-color:var(--vt-blue) !important;
+}
+.filter.active{
+  background:var(--vt-blue) !important;
+  color:#fff !important;
+  border-color:var(--vt-blue) !important;
+}
+.aiPrimaryBtn,
+.aiTagBtn,
+.aiDetailBtn{
+  background:linear-gradient(135deg,#4f6df5,#1677e8) !important;
+  color:#fff !important;
+  border-color:transparent !important;
+}
+
+/* Quick chips */
+.chip,
+.badge,
+.via,
+.transportBadge,
+.siteCount{
+  background:var(--vt-surface-3) !important;
+  color:var(--vt-text-2) !important;
+  border-color:var(--vt-border) !important;
+}
+.chip b,
+.chip strong{
+  color:var(--vt-blue) !important;
+}
+
+/* Platform colors */
+.platformIcon.ga4,
+.platformBadge.ga4{
+  background:var(--vt-blue-soft) !important;
+  color:var(--vt-blue) !important;
+}
+.platformIcon.meta,
+.platformBadge.meta{
+  background:var(--vt-purple-soft) !important;
+  color:var(--vt-purple) !important;
+}
+.platformIcon.googleads,
+.platformBadge.googleads{
+  background:var(--vt-green-soft) !important;
+  color:var(--vt-green) !important;
+}
+.platformIcon.datalayer,
+.platformBadge.datalayer{
+  background:var(--vt-orange-soft) !important;
+  color:var(--vt-orange) !important;
+}
+.platformIcon.serverside{
+  background:#12333b !important;
+  color:#62d8ef !important;
+}
+
+/* Status */
+.status.ok,
+.status:not(.error):not(.pending){
+  background:var(--vt-green-soft) !important;
+  color:var(--vt-green) !important;
+}
+.status.error{
+  background:var(--vt-red-soft) !important;
+  color:var(--vt-red) !important;
+}
+.status.pending{
+  background:var(--vt-surface-3) !important;
+  color:var(--vt-muted) !important;
+}
+.status[data-status-tooltip]::after,
+.status[data-status-tooltip]::before{
+  background:#020817 !important;
+  color:#f8fafc !important;
+}
+
+/* Copy states */
+.copyStatusBtn.copied{
+  background:var(--vt-green-soft) !important;
+  color:var(--vt-green) !important;
+  border-color:var(--vt-green) !important;
+}
+.copyStatusBtn.copyError{
+  background:var(--vt-red-soft) !important;
+  color:var(--vt-red) !important;
+  border-color:var(--vt-red) !important;
+}
+
+/* IA status */
+.aiConnection.online{
+  background:var(--vt-green-soft) !important;
+  color:var(--vt-green) !important;
+}
+.aiConnection.offline{
+  background:var(--vt-red-soft) !important;
+  color:var(--vt-red) !important;
+}
+.aiConnection.checking{
+  background:var(--vt-surface-3) !important;
+  color:var(--vt-muted) !important;
+}
+.aiFinding.high{
+  background:var(--vt-red-soft) !important;
+  border-left-color:var(--vt-red) !important;
+}
+.aiFinding.medium{
+  background:var(--vt-yellow-soft) !important;
+  border-left-color:var(--vt-yellow) !important;
+}
+.aiFinding.low{
+  background:var(--vt-blue-soft) !important;
+  border-left-color:var(--vt-blue) !important;
+}
+.aiFinding.good{
+  background:var(--vt-green-soft) !important;
+  border-left-color:var(--vt-green) !important;
+}
+
+/* DataLayer/code */
+.payload,
+.codeBox,
+.aiRaw,
+pre{
+  background:var(--vt-code-bg) !important;
+  color:var(--vt-code-text) !important;
+  border-color:#24354b !important;
+}
+.urlBox{
+  background:var(--vt-code-bg) !important;
+  color:#78b8ff !important;
+}
+.key-important{color:#ffd166 !important}
+.value-important{color:#7de0a2 !important}
+.key-normal{color:#8fc6ff !important}
+.string{color:#e7eef8 !important}
+.number{color:#ff9aad !important}
+.boolean{color:#c8b6ff !important}
+.null{color:#8292a7 !important}
+
+/* Data tables / history */
+.kvRow,
+.historyRow{
+  border-color:var(--vt-border) !important;
+  color:var(--vt-text-2) !important;
+}
+.historyRow.header{
+  color:var(--vt-muted) !important;
+}
+.siteItem.active{
+  background:#183558 !important;
+  color:#f8fbff !important;
+  border-color:#2e5d8f !important;
+}
+.siteItem.active .siteHost,
+.siteItem.active .siteMeta{
+  color:#f8fbff !important;
+}
+
+/* Dark-specific stats keeping platform identity */
+html[data-theme="dark"] .stat.ga4{
+  background:#102b49 !important;
+  border-color:#234d78 !important;
+}
+html[data-theme="dark"] .stat.meta{
+  background:#2c2042 !important;
+  border-color:#563c78 !important;
+}
+html[data-theme="dark"] .stat.ads{
+  background:#123323 !important;
+  border-color:#285a3d !important;
+}
+html[data-theme="dark"] .stat.other{
+  background:#16243a !important;
+}
+
+/* Power */
+.ventusPowerTrack{
+  background:#526176 !important;
+}
+.ventusPower input:checked + .ventusPowerTrack{
+  background:#18a957 !important;
+}
+.ventusPowerThumb{
+  background:#fff !important;
+}
+body.ventusPaused .monitor{
+  color:#f5c65d !important;
+}
+
+/* Modal overlay */
+.aiModal{
+  background:rgba(2,8,23,.72) !important;
+  backdrop-filter:blur(5px);
+}
+.aiModalCard{
+  box-shadow:var(--vt-shadow) !important;
+}
+
+/* Theme toggle itself */
+.themeToggle{
+  width:30px;
+  height:30px;
+  min-width:30px;
+  padding:0;
+  border-radius:8px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:15px;
+  transition:.16s ease;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:var(--vt-bg)}
+::-webkit-scrollbar-thumb{
+  background:var(--vt-border-strong);
+  border:2px solid var(--vt-bg);
+  border-radius:999px;
+}
+::-webkit-scrollbar-thumb:hover{background:var(--vt-muted)}
+
+/* Ventus v5.0 — polished actions */
+.themeToggle,.aiSettingsBtn,.clearBtn,.historyClear,.aiPrimaryBtn,.aiSecondaryBtn,.aiTagBtn,.aiDetailBtn,.copyStatusBtn,.detailClose,.aiCloseBtn,.filter,.mainTab{font-family:Inter,Segoe UI,Arial,sans-serif;-webkit-tap-highlight-color:transparent;transition:background .14s ease,color .14s ease,border-color .14s ease,transform .14s ease}
+.themeToggle,.aiSettingsBtn{width:34px!important;height:34px!important;min-width:34px!important;border-radius:9px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+.clearBtn{min-height:34px!important;padding:0 12px!important;border-radius:9px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;font-size:10px!important;font-weight:800!important}
+.ventusPower{min-height:34px;padding:0 8px;border:1px solid var(--vt-border);border-radius:10px;background:var(--vt-surface-2);margin-right:0!important}
+.mainTabs{padding:7px 10px!important;gap:6px!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.mainTab{height:38px!important;border:1px solid transparent!important;border-radius:9px!important;background:transparent!important}
+.mainTab:hover{background:var(--vt-surface-2)!important}
+.mainTab.active{background:var(--vt-blue-soft)!important;color:var(--vt-blue)!important;border-color:var(--vt-border-strong)!important}
+.mainTab.active:after{display:none!important}
+.filters{gap:6px!important;scrollbar-width:none}.filters::-webkit-scrollbar{display:none}
+.filter{min-height:30px!important;padding:0 10px!important;border:1px solid var(--vt-border)!important;border-radius:999px!important;background:var(--vt-surface)!important;color:var(--vt-text-2)!important}
+.filter:hover{background:var(--vt-surface-3)!important}
+.filter.active{background:var(--vt-blue)!important;color:#fff!important;border-color:var(--vt-blue)!important}
+.cardQuickActions{display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:6px!important;margin-top:7px!important}
+.copyStatusBtn{width:28px!important;height:28px!important;min-width:28px!important;border-radius:8px!important}
+.aiTagBtn,.aiDetailBtn{min-height:30px!important;padding:0 10px!important;border-radius:8px!important;font-size:9px!important}
+.aiPrimaryBtn,.aiSecondaryBtn{min-height:34px!important;padding:0 13px!important;border-radius:9px!important}
+.historyClear{min-height:32px!important;padding:0 10px!important;border-radius:8px!important}
+.detailClose,.aiCloseBtn{width:30px!important;height:30px!important;min-width:30px!important;padding:0!important;border-radius:8px!important}
+.themeToggle:focus-visible,.aiSettingsBtn:focus-visible,.clearBtn:focus-visible,.filter:focus-visible,.mainTab:focus-visible,.aiTagBtn:focus-visible,.aiDetailBtn:focus-visible,.copyStatusBtn:focus-visible,.historyClear:focus-visible,.detailClose:focus-visible,.aiCloseBtn:focus-visible,.aiPrimaryBtn:focus-visible,.aiSecondaryBtn:focus-visible{outline:2px solid var(--vt-blue)!important;outline-offset:2px!important}
+@media(hover:hover) and (pointer:fine){.themeToggle:hover,.aiSettingsBtn:hover,.clearBtn:hover,.copyStatusBtn:hover,.historyClear:hover,.detailClose:hover,.aiCloseBtn:hover,.aiSecondaryBtn:hover{transform:translateY(-1px)}.aiTagBtn:hover,.aiDetailBtn:hover,.aiPrimaryBtn:hover{transform:translateY(-1px);filter:brightness(1.05)}}
+@media(max-width:760px){.topbar{padding-left:10px!important;padding-right:10px!important;column-gap:6px!important}.clearBtn{width:34px!important;min-width:34px!important;padding:0!important;font-size:0!important}.clearBtn::before{content:"🗑";font-size:13px}}
+
+/* ==========================================================
+   Ventus v5.1 — Header alignment fix
+   Keeps monitoring/power, brand and utility actions in one row
+   ========================================================== */
+
+.topbar{
+  height:64px !important;
+  min-height:64px !important;
+  padding:0 10px !important;
+  display:grid !important;
+  grid-template-columns:minmax(112px,1fr) auto minmax(112px,1fr) !important;
+  grid-template-rows:64px !important;
+  align-items:center !important;
+  column-gap:8px !important;
+  overflow:visible !important;
+  position:relative !important;
+}
+
+/* Left: monitoring + power */
+.topbarLeft,
+.headerLeft,
+.monitorGroup{
+  grid-column:1 !important;
+  grid-row:1 !important;
+  justify-self:start !important;
+  align-self:center !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:7px !important;
+  min-width:0 !important;
+}
+
+/* The project uses direct topbar children, so explicitly normalize them too */
+.topbar .monitor{
+  position:static !important;
+  margin:0 !important;
+  align-self:center !important;
+  transform:none !important;
+  white-space:nowrap !important;
+}
+
+.topbar .ventusPower{
+  position:static !important;
+  margin:0 !important;
+  transform:none !important;
+  align-self:center !important;
+  min-height:30px !important;
+  height:30px !important;
+  padding:0 6px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  border-radius:9px !important;
+}
+
+/* If monitor + power are direct children, keep both in the left grid cell */
+.topbar > .monitor{
+  grid-column:1 !important;
+  grid-row:1 !important;
+  justify-self:start !important;
+}
+.topbar > .ventusPower{
+  grid-column:1 !important;
+  grid-row:1 !important;
+  justify-self:start !important;
+  margin-left:42px !important;
+}
+
+/* Center brand */
+.topbar .brand{
+  grid-column:2 !important;
+  grid-row:1 !important;
+  justify-self:center !important;
+  align-self:center !important;
+  position:static !important;
+  transform:none !important;
+  margin:0 !important;
+  z-index:2;
+}
+
+/* Right-side utility actions */
+.topbar .themeToggle{
+  grid-column:3 !important;
+  grid-row:1 !important;
+  justify-self:end !important;
+  align-self:center !important;
+  position:static !important;
+  transform:none !important;
+  margin:0 42px 0 0 !important;
+}
+.topbar .aiSettingsBtn{
+  grid-column:3 !important;
+  grid-row:1 !important;
+  justify-self:end !important;
+  align-self:center !important;
+  position:static !important;
+  transform:none !important;
+  margin:0 !important;
+}
+.topbar .clearBtn{
+  grid-column:3 !important;
+  grid-row:1 !important;
+  justify-self:end !important;
+  align-self:center !important;
+  position:static !important;
+  transform:none !important;
+  margin:0 !important;
+}
+
+/* AI connection status stays inside the header instead of dropping below it */
+.topbar .aiConnection{
+  grid-column:3 !important;
+  grid-row:1 !important;
+  justify-self:end !important;
+  align-self:center !important;
+  position:absolute !important;
+  right:48px !important;
+  bottom:4px !important;
+  margin:0 !important;
+  z-index:3 !important;
+  font-size:8px !important;
+  line-height:16px !important;
+  min-height:16px !important;
+  padding:0 6px !important;
+}
+
+/* Avoid the old mobile rule forcing the controls out of the header */
+@media(max-width:760px){
+  .topbar{
+    height:64px !important;
+    min-height:64px !important;
+    padding:0 8px !important;
+    grid-template-columns:minmax(105px,1fr) auto minmax(105px,1fr) !important;
+    column-gap:5px !important;
+  }
+
+  .topbar > .ventusPower{
+    margin-left:38px !important;
+  }
+
+  .topbar .themeToggle{
+    margin-right:36px !important;
+  }
+
+  .topbar .brand{
+    max-width:150px !important;
+  }
+}
+
+/* Very narrow popup: retain one row, compact labels rather than wrapping */
+@media(max-width:540px){
+  .topbar{
+    grid-template-columns:112px minmax(120px,1fr) 76px !important;
+  }
+
+  .topbar .monitor{
+    font-size:9px !important;
+  }
+
+  .topbar > .ventusPower{
+    margin-left:43px !important;
+  }
+
+  .topbar .ventusPowerLabel{
+    display:none !important;
+  }
+
+  .topbar .themeToggle,
+  .topbar .aiSettingsBtn{
+    width:30px !important;
+    height:30px !important;
+    min-width:30px !important;
+  }
+
+  .topbar .themeToggle{
+    margin-right:34px !important;
+  }
+
+  .topbar .aiConnection{
+    right:36px !important;
+  }
+}
+
+
+/* ==========================================================
+   Ventus v5.2 — Definitive header structure
+   ========================================================== */
+
+.topbar{
+  height:68px !important;
+  min-height:68px !important;
+  padding:0 10px !important;
+  display:grid !important;
+  grid-template-columns:minmax(130px,1fr) auto minmax(130px,1fr) !important;
+  align-items:center !important;
+  gap:8px !important;
+  overflow:hidden !important;
+}
+
+/* LEFT GROUP */
+.topbarLeft{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:7px;
+}
+
+.topbarLeft .monitor{
+  position:static !important;
+  margin:0 !important;
+  transform:none !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  min-height:30px !important;
+  padding:0 9px !important;
+  border-radius:999px !important;
+  white-space:nowrap !important;
+  font-size:9px !important;
+}
+
+.topbarLeft .dot{
+  flex:0 0 auto;
+  margin-right:5px !important;
+}
+
+.topbarLeft .ventusPower{
+  position:static !important;
+  transform:none !important;
+  margin:0 !important;
+  min-height:30px !important;
+  height:30px !important;
+  padding:0 5px !important;
+  border-radius:9px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:4px !important;
+  flex:0 0 auto;
+}
+
+.topbarLeft .ventusPowerTrack{
+  width:34px !important;
+  height:20px !important;
+}
+
+.topbarLeft .ventusPowerThumb{
+  width:16px !important;
+  height:16px !important;
+}
+
+.topbarLeft .ventusPower input:checked + .ventusPowerTrack .ventusPowerThumb{
+  transform:translateX(14px) !important;
+}
+
+.topbarLeft .ventusPowerLabel{
+  font-size:8px !important;
+  min-width:0 !important;
+}
+
+/* CENTER BRAND */
+.topbar .brand{
+  grid-column:2 !important;
+  position:static !important;
+  transform:none !important;
+  margin:0 !important;
+  justify-self:center !important;
+  align-self:center !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  min-width:0 !important;
+  z-index:2;
+}
+
+.topbar .brand img{
+  width:38px !important;
+  height:38px !important;
+  flex:0 0 38px;
+}
+
+.topbar .brandText h1{
+  font-size:18px !important;
+  line-height:18px !important;
+}
+
+.topbar .brandText > span{
+  font-size:7px !important;
+  letter-spacing:2px !important;
+}
+
+.topbar .signatureWrap{
+  margin-left:2px !important;
+  padding-left:7px !important;
+}
+
+.topbar .signatureName{
+  font-size:9px !important;
+}
+
+/* RIGHT GROUP */
+.topbarRight{
+  min-width:0;
+  justify-self:end;
+  display:grid;
+  grid-template-rows:auto auto;
+  align-items:center;
+  justify-items:end;
+  gap:2px;
+}
+
+.topbarActions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:5px;
+}
+
+.topbarRight .themeToggle,
+.topbarRight .aiSettingsBtn,
+.topbarRight .clearBtn{
+  position:static !important;
+  transform:none !important;
+  margin:0 !important;
+  width:30px !important;
+  min-width:30px !important;
+  height:30px !important;
+  min-height:30px !important;
+  padding:0 !important;
+  border-radius:8px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font-size:13px !important;
+}
+
+.topbarRight .clearBtn{
+  color:var(--vt-text-2) !important;
+}
+
+.topbarRight .clearBtn::before{
+  content:none !important;
+}
+
+.topbarRight .aiConnection{
+  position:static !important;
+  transform:none !important;
+  margin:0 !important;
+  padding:1px 6px !important;
+  min-height:14px !important;
+  line-height:14px !important;
+  font-size:7px !important;
+  border-radius:999px !important;
+  max-width:94px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Remove all old direct-child positioning rules */
+.topbar > .monitor,
+.topbar > .ventusPower,
+.topbar > .themeToggle,
+.topbar > .aiSettingsBtn,
+.topbar > .clearBtn,
+.topbar > .aiConnection{
+  grid-column:auto !important;
+  grid-row:auto !important;
+}
+
+/* Compact popup */
+@media(max-width:620px){
+  .topbar{
+    grid-template-columns:minmax(122px,1fr) auto minmax(94px,1fr) !important;
+    padding:0 7px !important;
+    gap:5px !important;
+  }
+
+  .topbarLeft{
+    gap:4px;
+  }
+
+  .topbarLeft .monitor{
+    padding:0 6px !important;
+  }
+
+  .topbarLeft .monitorText{
+    max-width:62px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .topbarLeft .ventusPowerLabel{
+    display:none !important;
+  }
+
+  .topbar .signatureWrap{
+    display:none !important;
+  }
+
+  .topbar .brand{
+    gap:6px !important;
+  }
+
+  .topbar .brand img{
+    width:34px !important;
+    height:34px !important;
+    flex-basis:34px !important;
+  }
+
+  .topbar .brandText h1{
+    font-size:16px !important;
+  }
+
+  .topbar .brandText > span{
+    display:none !important;
+  }
+
+  .topbarActions{
+    gap:4px;
+  }
+
+  .topbarRight .themeToggle,
+  .topbarRight .aiSettingsBtn,
+  .topbarRight .clearBtn{
+    width:28px !important;
+    min-width:28px !important;
+    height:28px !important;
+    min-height:28px !important;
+  }
+
+  .topbarRight .aiConnection{
+    max-width:88px;
+    font-size:7px !important;
+  }
+}
+
+/* Extra narrow safety */
+@media(max-width:540px){
+  .topbar{
+    grid-template-columns:120px minmax(104px,1fr) 92px !important;
+  }
+
+  .topbarLeft .monitor{
+    font-size:8px !important;
+  }
+
+  .topbarLeft .ventusPowerTrack{
+    width:32px !important;
+  }
+
+  .topbarLeft .ventusPower input:checked + .ventusPowerTrack .ventusPowerThumb{
+    transform:translateX(12px) !important;
+  }
+
+  .topbar .brandText h1{
+    font-size:15px !important;
+  }
+}
+
+/* ==========================================================
+   Ventus v5.3 — Header AI status refinement
+   ========================================================== */
+
+.topbarRight{
+  min-width:0 !important;
+  justify-self:end !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+}
+
+.topbarActions{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:5px !important;
+  min-width:0 !important;
+  white-space:nowrap !important;
+}
+
+.topbarRight .aiConnection{
+  position:static !important;
+  inset:auto !important;
+  transform:none !important;
+  margin:0 !important;
+  height:30px !important;
+  min-height:30px !important;
+  padding:0 9px !important;
+  border-radius:9px !important;
+  border:1px solid var(--vt-border-strong) !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:5px !important;
+  font-size:8px !important;
+  line-height:1 !important;
+  font-weight:800 !important;
+  max-width:none !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+  box-sizing:border-box !important;
+}
+
+.aiConnectionDot{
+  width:6px;
+  height:6px;
+  min-width:6px;
+  border-radius:50%;
+  background:currentColor;
+  opacity:.95;
+  box-shadow:0 0 0 3px color-mix(in srgb,currentColor 12%,transparent);
+}
+
+.aiConnectionText{
+  display:inline-block;
+  line-height:1;
+}
+
+.topbarRight .aiConnection.online{
+  background:var(--vt-green-soft) !important;
+  color:var(--vt-green) !important;
+  border-color:color-mix(in srgb,var(--vt-green) 35%,var(--vt-border)) !important;
+}
+
+.topbarRight .aiConnection.offline{
+  background:var(--vt-red-soft) !important;
+  color:var(--vt-red) !important;
+  border-color:color-mix(in srgb,var(--vt-red) 30%,var(--vt-border)) !important;
+}
+
+.topbarRight .aiConnection.checking{
+  background:var(--vt-surface-3) !important;
+  color:var(--vt-muted) !important;
+  border-color:var(--vt-border) !important;
+}
+
+.topbarRight .themeToggle,
+.topbarRight .aiSettingsBtn,
+.topbarRight .clearBtn{
+  flex:0 0 auto !important;
+}
+
+/* Prevent older rules from pushing the AI badge to another row */
+.topbar .aiConnection{
+  grid-column:auto !important;
+  grid-row:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+}
+
+/* Compact popup */
+@media(max-width:620px){
+  .topbar{
+    grid-template-columns:minmax(118px,1fr) auto minmax(146px,1fr) !important;
+  }
+
+  .topbarActions{
+    gap:4px !important;
+  }
+
+  .topbarRight .themeToggle,
+  .topbarRight .aiSettingsBtn,
+  .topbarRight .clearBtn{
+    width:28px !important;
+    min-width:28px !important;
+    height:28px !important;
+    min-height:28px !important;
+  }
+
+  .topbarRight .aiConnection{
+    height:28px !important;
+    min-height:28px !important;
+    padding:0 7px !important;
+    border-radius:8px !important;
+    font-size:7px !important;
+  }
+
+  .aiConnectionDot{
+    width:5px;
+    height:5px;
+    min-width:5px;
+  }
+}
+
+/* Very narrow popup: keep status readable but compact */
+@media(max-width:540px){
+  .topbar{
+    grid-template-columns:116px minmax(96px,1fr) 150px !important;
+  }
+
+  .topbarRight .aiConnection{
+    padding:0 6px !important;
+  }
+
+  .topbarRight .aiConnectionText{
+    max-width:48px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}

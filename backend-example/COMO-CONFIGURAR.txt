@@ -1,0 +1,40 @@
+COMO ATIVAR A IA DO VENTUS
+
+1. Instale Node.js 18 ou superior.
+2. Crie uma OpenAI API key na plataforma da OpenAI.
+3. Abra esta pasta backend-example.
+
+WINDOWS:
+- Opção simples:
+  dê dois cliques em INICIAR-VENTUS-AI.bat
+- Opção mais segura no PowerShell:
+  execute INICIAR-VENTUS-AI.ps1
+
+MAC/LINUX:
+  chmod +x INICIAR-VENTUS-AI.sh
+  ./INICIAR-VENTUS-AI.sh
+
+4. Digite sua OPENAI_API_KEY quando solicitado.
+
+5. O terminal deverá mostrar:
+   Ventus AI
+   Backend: http://localhost:8787
+   Modelo: gpt-5.6
+   API Key: configurada
+
+6. Na extensão:
+   - abra o Ventus Tag Debugger;
+   - clique na engrenagem;
+   - mantenha:
+     http://localhost:8787/analyze
+   - clique em Testar conexão.
+
+7. O topo da extensão mostrará:
+   IA online · gpt-5.6
+
+8. Clique em:
+   ✦ Analisar com IA
+
+IMPORTANTE
+A API key fica somente no processo local do backend.
+Não coloque a chave no manifest.json, popup.js ou qualquer arquivo da extensão.

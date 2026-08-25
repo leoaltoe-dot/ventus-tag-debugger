@@ -1,0 +1,21 @@
+VENTUS v5.0 — VALIDAÇÃO DA CAPTURA DE ERROS
+
+SUCCESS: HTTP 200–399
+CLIENT_ERROR: HTTP 400–499
+SERVER_ERROR: HTTP 500+
+
+NETWORK ERROR (chrome.webRequest.onErrorOccurred):
+- blocked
+- cancelled
+- timeout
+- network_error
+
+PENDING:
+request capturado e ainda sem onCompleted/onErrorOccurred.
+
+A atualização de status/erro é feita pelo requestId fornecido pelo Chrome.
+Isso evita associar um erro ao request errado quando existem URLs/eventos parecidos.
+
+IMPORTANTE:
+HTTP 200/204 confirma que o endpoint respondeu com sucesso HTTP.
+Não comprova sozinho processamento final no vendor nem uma chamada downstream server-to-server.
