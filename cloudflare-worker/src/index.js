@@ -39,6 +39,20 @@ REGRAS:
 - seja objetivo e técnico;
 - recomendações devem ser acionáveis.
 
+VALIDAÇÃO POR REGRAS (campo "ruleValidation"):
+- contém checagens determinísticas já feitas pela extensão (formato de value/currency, items, transaction_id, nomes de evento, event_id, consent mode, Data Layer × hit);
+- trate-as como fatos: não as contradiga sem evidência no payload e NÃO as repita;
+- traga o que as regras não cobrem: coerência entre parâmetros, contexto do evento no funil, riscos de atribuição, boas práticas específicas;
+- se não houver nada além das regras, devolva findings vazio e um summary curto.
+Cada finding deve ter "fix" (como corrigir, objetivo) e, se aplicável, "param" (parâmetro envolvido).
+
+SERVER-SIDE (campo "serverSide" e "possibleDualSend"):
+- serverSide.party = "first" → endpoint em subdomínio do site (bom para cookies first-party); "third" → domínio de terceiros (Stape/Cloud Run etc.), cookies não são first-party;
+- serverSide.firstPartyCookies (ex.: FPID, FPLC, FPGCL*) indica que a resposta veio de um server container que definiu cookies;
+- serverSide.preview = true → hit enviado em modo preview do sGTM;
+- possibleDualSend = true → o mesmo evento GA4 saiu direto para o Google E para o server container em até 3 s: alerte risco de contagem dupla;
+- nunca afirme que o servidor repassou ao GA4/Meta/Ads: isso não é visível no navegador.
+
 Retorne SOMENTE JSON válido no formato:
 {
   "score": 0,
@@ -47,7 +61,9 @@ Retorne SOMENTE JSON válido no formato:
     {
       "severity": "high|medium|low|good",
       "title": "Título curto",
-      "text": "Explicação objetiva"
+      "text": "Explicação objetiva",
+      "fix": "Como corrigir",
+      "param": "parâmetro (opcional)"
     }
   ],
   "recommendations": [
@@ -55,6 +71,36 @@ Retorne SOMENTE JSON válido no formato:
   ]
 }
 `;
+
+
+/* Garante um formato estável mesmo quando o modelo responde fora do esquema */
+function normalizeAnalysis(raw) {
+  const sev = new Set(["high", "medium", "low", "good"]);
+  const a = raw && typeof raw === "object" ? raw : {};
+  const score = Math.max(0, Math.min(100, Math.round(Number(a.score))));
+  return {
+    score: Number.isFinite(score) ? score : null,
+    summary: String(a.summary || "Análise concluída.").slice(0, 600),
+    findings: (Array.isArray(a.findings) ? a.findings : []).slice(0, 20).map(f => ({
+      severity: sev.has(String(f?.severity).toLowerCase()) ? String(f.severity).toLowerCase() : "low",
+      title: String(f?.title || "Ponto identificado").slice(0, 160),
+      text: String(f?.text || "").slice(0, 1200),
+      fix: String(f?.fix || "").slice(0, 600),
+      param: String(f?.param || "").slice(0, 80)
+    })),
+    recommendations: (Array.isArray(a.recommendations) ? a.recommendations : []).slice(0, 12).map(r => String(r).slice(0, 600))
+  };
+}
+
+/* Segurança: o Worker é público (workers.dev). Sem esta checagem qualquer site ou script
+   podia chamar /analyze e consumir créditos da OpenAI. Por padrão só páginas de extensão
+   (chrome-extension://) são aceitas; ALLOWED_ORIGINS (separadas por vírgula) restringe a
+   IDs específicos, ex.: "chrome-extension://abcdefghijklmnop". */
+function isAllowedOrigin(origin, env) {
+  const list = String(env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
+  if (list.length) return list.includes(origin);
+  return /^chrome-extension:\/\/[a-p]{32}$/.test(origin);
+}
 
 function corsHeaders(origin) {
   return {
@@ -171,6 +217,7 @@ async function analyzeWithOpenAI(tag, env) {
 
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
+    signal: AbortSignal.timeout(30000),
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${env.OPENAI_API_KEY}`
@@ -215,22 +262,25 @@ async function analyzeWithOpenAI(tag, env) {
     throw new Error("A OpenAI não retornou conteúdo.");
   }
 
-  return parseModelJson(output);
+  return normalizeAnalysis(parseModelJson(output));
 }
 
 export default {
   async fetch(request, env) {
-    const origin = request.headers.get("Origin") || "*";
+    const rawOrigin = request.headers.get("Origin") || "";
     const url = new URL(request.url);
+    const allowed = isAllowedOrigin(rawOrigin, env);
+    const origin = allowed ? rawOrigin : "null";
 
     if (request.method === "OPTIONS") {
+      if (!allowed) return new Response(null, { status: 403 });
       return new Response(null, {
         status: 204,
         headers: corsHeaders(origin)
       });
     }
 
-    if (request.method === "GET" && url.pathname === "/health") {
+    if (request.method === "GET" && url.pathname.replace(/\/+$/, "") === "/health") {
       return json(
         {
           ok: true,
@@ -244,11 +294,15 @@ export default {
       );
     }
 
-    if (request.method === "POST" && url.pathname === "/analyze") {
+    if (request.method === "POST" && url.pathname.replace(/\/+$/, "") === "/analyze") {
+      if (!allowed) {
+        return json({ error: "Origem não permitida." }, 403, origin);
+      }
       try {
-        const length = Number(request.headers.get("Content-Length") || 0);
+        /* Content-Length pode faltar (chunked): mede o corpo real */
+        const text = await request.text();
 
-        if (length > 1_000_000) {
+        if (text.length > 1_000_000) {
           return json(
             { error: "Payload maior que 1 MB." },
             413,
@@ -256,7 +310,8 @@ export default {
           );
         }
 
-        const body = await request.json();
+        let body;
+        try { body = JSON.parse(text); } catch { return json({ error: "JSON inválido." }, 400, origin); }
 
         if (!body?.tag) {
           return json(
