@@ -81,6 +81,26 @@ function safeJsonParse(text) {
   return JSON.parse(match[0]);
 }
 
+
+/* Garante um formato estável mesmo quando o modelo responde fora do esquema */
+function normalizeAnalysis(raw) {
+  const sev = new Set(["high", "medium", "low", "good"]);
+  const a = raw && typeof raw === "object" ? raw : {};
+  const score = Math.max(0, Math.min(100, Math.round(Number(a.score))));
+  return {
+    score: Number.isFinite(score) ? score : null,
+    summary: String(a.summary || "Análise concluída.").slice(0, 600),
+    findings: (Array.isArray(a.findings) ? a.findings : []).slice(0, 20).map(f => ({
+      severity: sev.has(String(f?.severity).toLowerCase()) ? String(f.severity).toLowerCase() : "low",
+      title: String(f?.title || "Ponto identificado").slice(0, 160),
+      text: String(f?.text || "").slice(0, 1200),
+      fix: String(f?.fix || "").slice(0, 600),
+      param: String(f?.param || "").slice(0, 80)
+    })),
+    recommendations: (Array.isArray(a.recommendations) ? a.recommendations : []).slice(0, 12).map(r => String(r).slice(0, 600))
+  };
+}
+
 const SYSTEM_PROMPT = `
 Você é o Ventus AI, especialista sênior em:
 - Google Analytics 4;
@@ -117,6 +137,20 @@ IMPORTANTE:
 - seja específico sobre o parâmetro ou campo em questão;
 - respostas devem ser curtas e acionáveis.
 
+VALIDAÇÃO POR REGRAS (campo "ruleValidation"):
+- contém checagens determinísticas já feitas pela extensão (formato de value/currency, items, transaction_id, nomes de evento, event_id, consent mode, Data Layer × hit);
+- trate-as como fatos: não as contradiga sem evidência no payload e NÃO as repita;
+- traga o que as regras não cobrem: coerência entre parâmetros, contexto do evento no funil, riscos de atribuição, boas práticas específicas;
+- se não houver nada além das regras, devolva findings vazio e um summary curto.
+Cada finding deve ter "fix" (como corrigir, objetivo) e, se aplicável, "param" (parâmetro envolvido).
+
+SERVER-SIDE (campo "serverSide" e "possibleDualSend"):
+- serverSide.party = "first" → endpoint em subdomínio do site (bom para cookies first-party); "third" → domínio de terceiros (Stape/Cloud Run etc.), cookies não são first-party;
+- serverSide.firstPartyCookies (ex.: FPID, FPLC, FPGCL*) indica que a resposta veio de um server container que definiu cookies;
+- serverSide.preview = true → hit enviado em modo preview do sGTM;
+- possibleDualSend = true → o mesmo evento GA4 saiu direto para o Google E para o server container em até 3 s: alerte risco de contagem dupla;
+- nunca afirme que o servidor repassou ao GA4/Meta/Ads: isso não é visível no navegador.
+
 Responda SOMENTE JSON válido:
 {
   "score": 0,
@@ -125,7 +159,9 @@ Responda SOMENTE JSON válido:
     {
       "severity": "high|medium|low|good",
       "title": "Título curto",
-      "text": "Explicação"
+      "text": "Explicação",
+      "fix": "Como corrigir",
+      "param": "parâmetro (opcional)"
     }
   ],
   "recommendations": [
@@ -141,6 +177,7 @@ async function callOpenAI(tag) {
 
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
+    signal: AbortSignal.timeout(30000),
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${OPENAI_API_KEY}`
@@ -185,12 +222,18 @@ async function callOpenAI(tag) {
     throw new Error("A IA não retornou conteúdo.");
   }
 
-  return safeJsonParse(output);
+  return normalizeAnalysis(safeJsonParse(output));
 }
 
 const server = http.createServer(async (req, res) => {
   /* FIX: "/health?x=1" ou "/analyze/" retornavam 404 */
   const pathname = new URL(req.url, "http://localhost").pathname.replace(/\/+$/, "") || "/";
+
+  /* Só a extensão (chrome-extension://) ou ferramentas locais sem Origin podem chamar o backend */
+  const origin = req.headers.origin || "";
+  if (origin && !/^chrome-extension:\/\//.test(origin) && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    return send(res, 403, { error: "Origem não permitida." });
+  }
 
   if (req.method === "OPTIONS") {
     res.writeHead(204, headers());
