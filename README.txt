@@ -163,3 +163,20 @@ VENTUS v5.5 — NOVO VISUAL
 
 VENTUS v5.5.1
 - Corrigido: popup abria estreito (~285 px). Agora abre sempre em 800x600, o tamanho máximo de popup do Chrome.
+
+VENTUS v5.6 — ORGANIZAÇÃO VISUAL + REVISÃO DE CÓDIGO
+Visual
+- Cards reorganizados: plataforma + hora, título em até 2 linhas (sem cortar no meio), ID + container GTM + status, chips só com dados úteis (transaction_id, value, currency, label) e rodapé com método, duração e endpoint.
+- Detalhe: título em até 2 linhas, linha de metadados (ID, GTM, hora, duração, status), botão de IA no topo; grade de informações com campos largos para Evento, Endpoint e Transporte.
+- Resumo do topo virou filtro por status (Eventos / Sucesso / Erros / Pendentes).
+- Filtros de plataforma mostram contagem e só aparecem as plataformas que dispararam (antes a linha cortava GTM/TikTok/Server Side).
+- Histórico: coluna de evento mais larga (2 linhas), status colorido e ponto de cor por plataforma; textos longos com tooltip.
+- Data Layer: origem (push / já existente) e botão "Copiar JSON". Detalhe: copiar URL e JSON do Data Layer.
+- Estados vazios com orientação.
+Código
+- Lista limitada aos 300 eventos mais recentes (Data Layer 300, histórico 500) — evita travar o popup com 8000 itens.
+- Busca com debounce; lookup do container GTM com cache (antes varria tudo para cada card).
+- Data Layer só é associado à tag quando o nome bate (até 30 s) ou o push ocorreu até 1,5 s antes — antes qualquer push anterior era exibido.
+- "Limpar histórico" e "Limpar site" pedem confirmação (segundo clique em até 3 s).
+- Esc fecha modais e o detalhe.
+- Detecção: Google Ads view-through conversion, gtm.js servido por domínio próprio (server-side), evento e pixel do TikTok em payload JSON, chaves de corpos JSON disponíveis como parâmetros.
