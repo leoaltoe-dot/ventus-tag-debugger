@@ -127,3 +127,39 @@ VENTUS v5.3
 - Badge IA offline/online redesenhado como pill compacto com indicador de status.
 - Removida a segunda linha do bloco de ações.
 - Tema, configurações, IA e limpar permanecem alinhados horizontalmente.
+
+VENTUS v5.4 — CORREÇÕES
+- Histórico não é mais sobrescrito quando o service worker acorda (race condition ao carregar o storage).
+- Gravação no storage com debounce + permissão unlimitedStorage (antes estourava a cota de 10 MB em silêncio).
+- Status/headers atualizados por Map de requestId (antes varria até 8000 eventos a cada request de qualquer site).
+- dataLayer: script roda no MAIN world em document_start (manifest "world": "MAIN"), sem <script src>.
+- dataLayer: serialização segura de gtm.element (DOM), eventCallback (funções), referências circulares e gtag(arguments).
+  Antes esses pushes eram perdidos com o erro "Could not serialize message".
+- dataLayer: reatribuição window.dataLayer = [...] é detectada a qualquer momento (antes só por 15 s).
+- Eventos gtag('event','purchase',...) aparecem com o nome correto.
+- content.js não gera erro "Extension context invalidated" após recarregar a extensão.
+- Popup: render agrupado por frame e só da aba visível; painel de detalhe não perde o scroll a cada evento novo.
+- Popup: badge "IA online/offline" mantém o indicador (bolinha) após o health check.
+- Popup: texto "Monitorando/Captura pausada" mantém o span usado pelo CSS responsivo.
+- Popup: histórico limpa título/estatísticas/botão quando não há sites.
+- Popup: duração usa durationMs (correto para eventos em batch do GA4).
+- Popup: "copiar status" agora inclui o container GTM.
+- IA: campos de usuário da Meta/Ads (em, ph, fn, ln, ud[em]...) são removidos antes do envio.
+- IA: header X-Ventus-Version usa a versão do manifest; timeouts limpos corretamente.
+- Painel DevTools: limitado a 500 linhas e render agrupado.
+- Permissões não usadas removidas: downloads, tabs. web_accessible_resources removido.
+- backend-example: CORS aceita X-Ventus-Version; rotas aceitam query string/barra final.
+- Requer Chrome 111+.
+
+VENTUS v5.5 — NOVO VISUAL
+- popup.css reescrito do zero (de ~1.765 linhas de overrides com !important para um design system único).
+- Tokens de cor separados para tema claro e escuro; cores por plataforma (GA4, Meta, Ads, Floodlight, GTM, TikTok, Server Side, Data Layer).
+- Header mais compacto com ícones SVG, logo centralizada e status da IA em pill.
+- Abas com contadores (eventos, Data Layer, sites).
+- Cards mais densos: barra lateral da plataforma, status com indicador, chips em fonte mono, ações na mesma linha.
+- Painel de detalhe com abas em pill, grade de informações adaptável, tabelas zebradas e timeline refinada.
+- Histórico, Data Layer, modais de IA e painel do DevTools no mesmo padrão visual.
+- Layout responsivo para larguras estreitas e respeito a "reduzir movimento".
+
+VENTUS v5.5.1
+- Corrigido: popup abria estreito (~285 px). Agora abre sempre em 800x600, o tamanho máximo de popup do Chrome.

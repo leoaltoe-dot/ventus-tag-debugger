@@ -1,30 +1,38 @@
 let events=[];let liveFilter='ALL';let selectedEventId=null;let selectedDetailTab='summary';let selectedSite=null;
 const IMPORTANT_KEYS=new Set(['event','event_name','transaction_id','value','currency','item_id','item_name','item_brand','item_category','item_variant','source','medium','campaign','utm_source','utm_medium','utm_campaign','gclid','client_id','user_id','id','ev','tid','en']);
-function load(){chrome.runtime.sendMessage({type:'VENTUS_GET_EVENTS'},r=>{events=Array.isArray(r?.events)?r.events.filter(Boolean):[];if(selectedEventId&&!events.some(e=>e.id===selectedEventId))selectedEventId=null;renderAll();});}load();
-chrome.runtime.onMessage.addListener(m=>{if(!m)return;if(m.type==='VENTUS_NEW_EVENT'&&m.payload){events.push(m.payload);renderAll();}if(m.type==='VENTUS_REFRESH')load();});
-document.querySelectorAll('.mainTab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.mainTab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.view).classList.add('active');}));
+function load(){chrome.runtime.sendMessage({type:'VENTUS_GET_EVENTS'},r=>{if(chrome.runtime.lastError)return;events=Array.isArray(r?.events)?r.events.filter(Boolean):[];if(selectedEventId&&!events.some(e=>e.id===selectedEventId))selectedEventId=null;scheduleRender();});}load();
+/* FIX: every captured request re-rendered all views (thousands of cards) synchronously.
+   Renders are now batched per animation frame and only the visible view is rebuilt. */
+let renderQueued=false;function scheduleRender(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderAll();});}
+let loadTimer=null;function scheduleLoad(){clearTimeout(loadTimer);loadTimer=setTimeout(load,150);}
+chrome.runtime.onMessage.addListener(m=>{if(!m)return;if(m.type==='VENTUS_NEW_EVENT'&&m.payload){if(!events.some(e=>e.id===m.payload.id))events.push(m.payload);scheduleRender();}if(m.type==='VENTUS_REFRESH')scheduleLoad();});
+document.querySelectorAll('.mainTab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.mainTab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.view).classList.add('active');renderAll();}));
 document.querySelectorAll('.filter').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));btn.classList.add('active');liveFilter=btn.dataset.filter;renderLive();}));
 document.getElementById('searchLive').addEventListener('input',renderLive);document.getElementById('searchDL').addEventListener('input',renderDL);document.getElementById('searchSite').addEventListener('input',renderHistory);
-document.getElementById('clear').addEventListener('click',()=>chrome.runtime.sendMessage({type:'VENTUS_CLEAR_EVENTS'},()=>{events=[];selectedEventId=null;selectedSite=null;renderAll();}));
-document.getElementById('clearSite').addEventListener('click',()=>{if(!selectedSite)return;chrome.runtime.sendMessage({type:'VENTUS_CLEAR_SITE',siteHost:selectedSite},()=>{events=events.filter(e=>e.siteHost!==selectedSite);selectedSite=null;renderAll();});});
-function renderAll(){renderStats();renderLive();renderDL();renderHistory();}
-function renderStats(){const n=events.filter(e=>e.type==='network');const c={total:n.length,ga4:n.filter(e=>e.platform==='GA4').length,meta:n.filter(e=>e.platform==='Meta').length,ads:n.filter(e=>e.platform==='Google Ads').length};const other=Math.max(0,c.total-c.ga4-c.meta-c.ads);document.getElementById('stats').innerHTML=stat(c.total,'Eventos','')+stat(c.ga4,'GA4','ga4')+stat(c.meta,'Meta','meta')+stat(c.ads,'Google Ads','ads')+stat(other,'Outros','');}
+document.getElementById('clear').addEventListener('click',()=>chrome.runtime.sendMessage({type:'VENTUS_CLEAR_EVENTS'},()=>{events=[];selectedEventId=null;selectedSite=null;detailSignature='';renderAll();}));
+document.getElementById('clearSite').addEventListener('click',()=>{if(!selectedSite)return;const site=selectedSite;chrome.runtime.sendMessage({type:'VENTUS_CLEAR_SITE',siteHost:site},()=>{events=events.filter(e=>e.siteHost!==site);if(selectedSite===site)selectedSite=null;renderAll();});});
+function activeView(){return document.querySelector('.view.active')?.id||'eventsView';}
+function renderCounts(){const n=events.filter(e=>e.type==='network').length,d=events.filter(e=>e.type==='datalayer').length,s=new Set(events.map(e=>e.siteHost||'site-desconhecido')).size;const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v>999?'999+':String(v);};set('tabCountEvents',n);set('tabCountDL',d);set('tabCountSites',s);}
+function renderAll(){renderCounts();const v=activeView();if(v==='eventsView'){renderStats();renderLive();}else if(v==='dlView')renderDL();else if(v==='historyView')renderHistory();}
+function renderStats(){const n=events.filter(e=>e.type==='network');const c={total:n.length,ga4:n.filter(e=>e.platform==='GA4').length,meta:n.filter(e=>e.platform==='Meta').length,ads:n.filter(e=>e.platform==='Google Ads').length};const other=Math.max(0,c.total-c.ga4-c.meta-c.ads);document.getElementById('stats').innerHTML=stat(c.total,'Eventos','')+stat(c.ga4,'GA4','ga4')+stat(c.meta,'Meta','meta')+stat(c.ads,'Ads','ads')+stat(other,'Outros','other');}
 function stat(v,l,c){return `<div class="stat ${c}"><div class="v">${v}</div><div class="l">${l}</div></div>`;}
 function renderLive(){const q=document.getElementById('searchLive').value.trim().toLowerCase();const list=events.filter(e=>e.type==='network').filter(e=>liveFilter==='ALL'||e.platform===liveFilter).filter(e=>!q||str(e).includes(q)).slice().reverse();const w=document.getElementById('liveEvents');w.innerHTML=list.length?list.map(card).join(''):'<div class="empty">Nenhum evento encontrado.</div>';w.querySelectorAll('[data-event-id]').forEach(el=>el.addEventListener('click',()=>{selectedEventId=el.dataset.eventId;selectedDetailTab='summary';renderLive();renderDetail();const panel=document.getElementById('detailPanel');if(window.innerWidth<=620)panel?.classList.add('mobileOpen');}));renderDetail();}
 function card(e){const cls=platformClass(e.platform),p=e.allParams||{},gtm=getGtmContainer(e.siteHost,e.timestamp);return `<article class="eventCard ${cls} ${selectedEventId===e.id?'selected':''}" data-event-id="${attr(e.id)}"><div class="cardTop"><div class="cardLeft"><div class="platformIcon ${cls}">${esc(shortPlatform(e.platform))}</div><div><div class="cardSub">${esc(e.platform)}</div><div class="cardTitle">${esc(e.eventName||'Request')}</div><div class="cardSub">${esc(e.trackingId||e.conversionId||'')}${gtm?` <span class="via">via ${esc(gtm)}</span>`:''}</div></div></div><div class="cardRight"><div class="time">${timeText(e.timestamp)}</div>${statusBadge(e.status,e.error||'')}</div></div><div class="chips">${chips(e,p)}</div>
-    <div class="cardQuickActions">
-      <button class="copyStatusBtn" type="button" data-copy-status-id="${attr(e.id)}" title="Copiar status/erro">⧉</button>
-    </div><button class="aiTagBtn" type="button" data-ai-event-id="${attr(e.id)}">✦ Analisar com IA</button></article>`;}
+<div class="cardActions"><button class="copyStatusBtn" type="button" data-copy-status-id="${attr(e.id)}" title="Copiar status/erro">⧉</button><button class="aiTagBtn" type="button" data-ai-event-id="${attr(e.id)}" title="Analisar com IA">✦ Analisar</button></div></article>`;}
 function chips(e,p){const vals=[['event_name',p.en||p.ev||p.event_name],['transaction_id',p['ep.transaction_id']||p.transaction_id],['value',p['ep.value']||p.value],['currency',p['ep.currency']||p.currency],['endpoint',e.path],['method',e.method]].filter(([,v])=>v!==undefined&&v!==null&&v!=='');return vals.slice(0,6).map(([k,v])=>`<span class="chip"><b>${esc(k)}</b>&nbsp;${esc(first(v))}</span>`).join('');}
-function renderDetail(){const panel=document.getElementById('detailPanel'),e=events.find(x=>x.id===selectedEventId);if(!e){panel.className='detailPanel emptyDetail';panel.innerHTML='<div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div>';return;}panel.className='detailPanel';const dl=correlateDataLayer(e),gtm=getGtmContainer(e.siteHost,e.timestamp),duration=e.completedAt&&e.timestamp?Math.max(0,e.completedAt-e.timestamp):null;panel.innerHTML=`<div class="detailHeader"><div class="detailTitleWrap"><div class="detailBadge">${esc(shortPlatform(e.platform))}</div><div><div class="detailTitle">${esc(e.eventName||'Request')}</div><div class="detailSub">${esc(e.trackingId||e.conversionId||'')}${gtm?` <span class="via">via ${esc(gtm)}</span>`:''}</div></div></div><div class="detailRight"><div class="time">${timeText(e.timestamp)}</div>${statusBadge(e.status,e.error||'')}<button class="aiDetailBtn" id="aiDetailBtn" data-ai-event-id="${attr(e.id)}" type="button">✦ Analisar IA</button><button class="detailClose" id="detailClose" title="Voltar">×</button></div></div><div class="detailTabs">${detailTab('summary','Resumo')}${detailTab('datalayer','Data Layer')}${detailTab('params','Parâmetros')}${detailTab('headers','Headers')}${detailTab('response','Resposta')}${detailTab('timeline','Timeline')}</div><div class="detailBody"><section class="detailSection ${selectedDetailTab==='summary'?'active':''}">${summaryHtml(e,dl,gtm,duration)}</section><section class="detailSection ${selectedDetailTab==='datalayer'?'active':''}"><div class="blockTitle">Evento Data Layer associado</div><div class="codeBox">${dl?renderObject(dl.data):'Nenhum Data Layer correspondente encontrado.'}</div></section><section class="detailSection ${selectedDetailTab==='params'?'active':''}">${kvTable('Query String',e.queryParams)}${kvTable('Body / POST',e.bodyParams)}${kvTable('Parâmetros combinados',e.allParams)}</section><section class="detailSection ${selectedDetailTab==='headers'?'active':''}">${kvTable('Request Headers',e.requestHeaders)}${kvTable('Response Headers',e.responseHeaders)}</section><section class="detailSection ${selectedDetailTab==='response'?'active':''}"><div class="infoGrid">${infoStatus(e)}${info('Status line',e.statusLine||'-')}${info('Concluído em',e.completedAt?timeText(e.completedAt):'-')}${info('Erro',e.error||'-')}</div></section><section class="detailSection ${selectedDetailTab==='timeline'?'active':''}">${timelineHtml(e,dl,gtm)}</section></div>`;const closeBtn=panel.querySelector('#detailClose');if(closeBtn){closeBtn.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();});closeBtn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();if(typeof ev.stopImmediatePropagation==='function')ev.stopImmediatePropagation();selectedEventId=null;selectedDetailTab='summary';panel.classList.remove('mobileOpen');panel.className='detailPanel emptyDetail';panel.innerHTML='<div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div>';});}panel.querySelectorAll('.detailTab').forEach(btn=>btn.addEventListener('click',()=>{selectedDetailTab=btn.dataset.tab;renderDetail();}));if(window.innerWidth<=620&&selectedEventId)panel.classList.add('mobileOpen');}
+/* FIX: the detail panel was rebuilt on every new event, resetting its scroll while the
+   user was reading. It is only rebuilt when the selected event/tab actually changes. */
+let detailSignature='';
+function renderDetail(force=false){const panel=document.getElementById('detailPanel'),e=events.find(x=>x.id===selectedEventId);const sig=e?[e.id,selectedDetailTab,e.status,e.completedAt,Object.keys(e.requestHeaders||{}).length,Object.keys(e.responseHeaders||{}).length,dlSig(e),getGtmContainer(e.siteHost,e.timestamp)].join('|'):'none';if(!force&&sig===detailSignature)return;detailSignature=sig;if(!e){panel.className='detailPanel emptyDetail';panel.innerHTML='<div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div>';return;}panel.className='detailPanel';const dl=correlateDataLayer(e),gtm=getGtmContainer(e.siteHost,e.timestamp),duration=Number.isFinite(e.durationMs)?e.durationMs:(e.completedAt&&(e.startedAt||e.timestamp)?Math.max(0,e.completedAt-(e.startedAt||e.timestamp)):null);panel.innerHTML=`<div class="detailHeader"><div class="detailTitleWrap"><div class="detailBadge ${platformClass(e.platform)}">${esc(shortPlatform(e.platform))}</div><div><div class="detailTitle">${esc(e.eventName||'Request')}</div><div class="detailSub">${esc(e.trackingId||e.conversionId||'')}${gtm?` <span class="via">via ${esc(gtm)}</span>`:''}</div></div></div><div class="detailRight"><div class="time">${timeText(e.timestamp)}</div>${statusBadge(e.status,e.error||'')}<button class="aiDetailBtn" id="aiDetailBtn" data-ai-event-id="${attr(e.id)}" type="button">✦ Analisar IA</button><button class="detailClose" id="detailClose" title="Voltar">×</button></div></div><div class="detailTabs">${detailTab('summary','Resumo')}${detailTab('datalayer','Data Layer')}${detailTab('params','Parâmetros')}${detailTab('headers','Headers')}${detailTab('response','Resposta')}${detailTab('timeline','Timeline')}</div><div class="detailBody"><section class="detailSection ${selectedDetailTab==='summary'?'active':''}">${summaryHtml(e,dl,gtm,duration)}</section><section class="detailSection ${selectedDetailTab==='datalayer'?'active':''}"><div class="blockTitle">Evento Data Layer associado</div><div class="codeBox">${dl?renderObject(dl.data):'Nenhum Data Layer correspondente encontrado.'}</div></section><section class="detailSection ${selectedDetailTab==='params'?'active':''}">${kvTable('Query String',e.queryParams)}${kvTable('Body / POST',e.bodyParams)}${kvTable('Parâmetros combinados',e.allParams)}</section><section class="detailSection ${selectedDetailTab==='headers'?'active':''}">${kvTable('Request Headers',e.requestHeaders)}${kvTable('Response Headers',e.responseHeaders)}</section><section class="detailSection ${selectedDetailTab==='response'?'active':''}"><div class="infoGrid">${infoStatus(e)}${info('Status line',e.statusLine||'-')}${info('Concluído em',e.completedAt?timeText(e.completedAt):'-')}${info('Erro',e.error||'-')}</div></section><section class="detailSection ${selectedDetailTab==='timeline'?'active':''}">${timelineHtml(e,dl,gtm)}</section></div>`;const closeBtn=panel.querySelector('#detailClose');if(closeBtn){closeBtn.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();});closeBtn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();if(typeof ev.stopImmediatePropagation==='function')ev.stopImmediatePropagation();selectedEventId=null;selectedDetailTab='summary';detailSignature='none';document.querySelectorAll('.eventCard.selected').forEach(c=>c.classList.remove('selected'));panel.classList.remove('mobileOpen');panel.className='detailPanel emptyDetail';panel.innerHTML='<div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div>';});}panel.querySelectorAll('.detailTab').forEach(btn=>btn.addEventListener('click',()=>{selectedDetailTab=btn.dataset.tab;renderDetail(true);}));if(window.innerWidth<=620&&selectedEventId)panel.classList.add('mobileOpen');}
 function summaryHtml(e,dl,gtm,duration){return `<div class="infoGrid">${info('Plataforma',e.platform)}${info('Evento',e.eventName,'blue')}${info('Measurement / Pixel ID',e.trackingId||e.conversionId||'-','blue')}${info('Método',e.method||'-')}${info('Endpoint',e.path||'-')}${infoStatus(e)}${info('Duração',duration!==null?duration+' ms':'-')}${info('GTM Container',gtm||'Não identificado','blue')}</div><div class="blockTitle">Data Layer relacionado</div><div class="codeBox">${dl?renderObject(dl.data):'Nenhum evento Data Layer correlacionado.'}</div><div class="blockTitle">Request (URL completa)</div><div class="urlBox">${esc(e.url||'')}</div>${timelineHtml(e,dl,gtm)}`;}
 function detailTab(id,label){return `<button class="detailTab ${selectedDetailTab===id?'active':''}" data-tab="${id}">${label}</button>`;}function info(k,v,c=''){return `<div class="infoBox"><div class="k">${esc(k)}</div><div class="v ${c}">${esc(v)}</div></div>`;}function infoStatus(e){const meta=statusInfo(e.status,e.error||"");return `<div class="infoBox"><div class="k">Status</div><div class="v"><span class="status ${meta.cls}" data-status-tooltip="${attr(meta.tooltip)}">${esc(meta.label)}</span></div></div>`;}
 function kvTable(t,o){const entries=Object.entries(o||{});return `<div class="blockTitle">${esc(t)}</div><div class="kvTable">${entries.length?entries.map(([k,v])=>`<div class="kvRow"><div class="key">${esc(k)}</div><div class="value">${esc(typeof v==='object'?JSON.stringify(v):v)}</div></div>`).join(''):'<div class="kvRow"><div class="key">—</div><div class="value">Nenhum dado</div></div>'}</div>`;}
+function dlSig(e){const d=correlateDataLayer(e);return d?d.id:'';}
 function correlateDataLayer(e){const candidates=events.filter(x=>x.type==='datalayer'&&x.siteHost===e.siteHost&&(x.timestamp||0)<=e.timestamp);if(!candidates.length)return null;const exact=candidates.filter(x=>normalize(x.eventName)===normalize(e.eventName));const pool=exact.length?exact:candidates;return pool.sort((a,b)=>Math.abs(e.timestamp-a.timestamp)-Math.abs(e.timestamp-b.timestamp))[0]||null;}
 function getGtmContainer(siteHost,ts){const gtms=events.filter(x=>x.type==='network'&&x.platform==='GTM'&&x.siteHost===siteHost&&(x.timestamp||0)<=ts&&/^GTM-/i.test(x.trackingId||''));if(!gtms.length)return '';return gtms.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0))[0].trackingId||'';}
 function timelineHtml(e,dl,gtm){const responseTs=e.completedAt||null;return `<div class="blockTitle">Timeline do evento</div><div class="timeline"><div class="step dl"><div class="stepDot">DL</div><div class="stepName">Data Layer</div><div class="stepMeta">${dl?timeText(dl.timestamp):'não correlacionado'}<br>${dl?esc(dl.eventName):''}</div></div><div class="step gtm"><div class="stepDot">G</div><div class="stepName">GTM</div><div class="stepMeta">${gtm?esc(gtm):'não identificado'}</div></div><div class="step"><div class="stepDot">↗</div><div class="stepName">${esc(e.platform)} Request</div><div class="stepMeta">${timeText(e.timestamp)}<br>${esc(e.path||'')}</div></div><div class="step response"><div class="stepDot">✓</div><div class="stepName">Resposta</div><div class="stepMeta">${responseTs?timeText(responseTs):'...'}<br>${esc(e.status??'-')}</div></div></div>`;}
-function renderDL(){const q=document.getElementById('searchDL').value.trim().toLowerCase();const list=events.filter(e=>e.type==='datalayer').filter(e=>!q||str(e).includes(q)).slice().reverse();document.getElementById('dlEvents').innerHTML=list.length?list.map(e=>`<article class="eventCard dlCard"><div class="cardTop"><div class="cardLeft"><div class="platformIcon" style="color:#f97316">DL</div><div><div class="cardSub">Data Layer</div><div class="cardTitle">${esc(e.eventName||'dataLayer.push')}</div><div class="cardSub">${esc(e.siteHost||'')}</div></div></div><div class="time">${timeText(e.timestamp)}</div></div><div class="payload">${renderObject(e.data)}</div></article>`).join(''):'<div class="empty">Nenhum Data Layer capturado.</div>';}
-function renderHistory(){const q=document.getElementById('searchSite').value.trim().toLowerCase(),grouped={};events.filter(Boolean).forEach(e=>{const s=e.siteHost||'site-desconhecido';(grouped[s]??=[]).push(e)});const sites=Object.entries(grouped).filter(([s])=>!q||s.toLowerCase().includes(q)).sort((a,b)=>latest(b[1])-latest(a[1]));if(!sites.length){document.getElementById('siteList').innerHTML='<div class="empty">Sem histórico.</div>';document.getElementById('historyEvents').innerHTML='';return;}if(!selectedSite||!grouped[selectedSite])selectedSite=sites[0][0];document.getElementById('siteList').innerHTML=sites.map(([s,l])=>`<div class="siteItem ${s===selectedSite?'active':''}" data-site="${attr(s)}"><div class="siteTop"><div class="siteHost">${esc(s)}</div><div class="siteCount">${l.length}</div></div><div class="siteMeta">${friendlyDate(latest(l))}</div></div>`).join('');document.querySelectorAll('.siteItem').forEach(el=>el.addEventListener('click',()=>{selectedSite=el.dataset.site;renderHistory();}));const list=grouped[selectedSite]||[];document.getElementById('historySiteTitle').textContent=selectedSite;document.getElementById('historySiteMeta').textContent=`${list.length} eventos • último ${friendlyDate(latest(list))}`;document.getElementById('clearSite').classList.remove('hidden');const c={all:list.length,ga4:list.filter(x=>x.platform==='GA4').length,meta:list.filter(x=>x.platform==='Meta').length,dl:list.filter(x=>x.type==='datalayer').length};document.getElementById('historyStats').innerHTML=mini(c.all,'Eventos')+mini(c.ga4,'GA4')+mini(c.meta,'Meta')+mini(c.dl,'Data Layer');const rows=list.slice().sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));document.getElementById('historyEvents').innerHTML='<div class="historyRow header"><div>Hora</div><div>Plataforma</div><div>Evento</div><div>ID / Tag</div><div>Status</div></div>'+rows.map(e=>`<div class="historyRow"><div>${timeText(e.timestamp)}</div><div>${esc(e.type==='datalayer'?'Data Layer':e.platform)}</div><div><b>${esc(e.eventName||'-')}</b></div><div>${esc(e.trackingId||e.conversionId||'-')}</div><div>${esc(e.status??'-')}</div></div>`).join('');}
+function renderDL(){const q=document.getElementById('searchDL').value.trim().toLowerCase();const list=events.filter(e=>e.type==='datalayer').filter(e=>!q||str(e).includes(q)).slice().reverse();document.getElementById('dlEvents').innerHTML=list.length?list.map(e=>`<article class="eventCard dlCard"><div class="cardTop"><div class="cardLeft"><div class="platformIcon dl">DL</div><div><div class="cardSub">Data Layer</div><div class="cardTitle">${esc(e.eventName||'dataLayer.push')}</div><div class="cardSub">${esc(e.siteHost||'')}</div></div></div><div class="time">${timeText(e.timestamp)}</div></div><div class="payload">${renderObject(e.data)}</div></article>`).join(''):'<div class="empty">Nenhum Data Layer capturado.</div>';}
+function renderHistory(){const q=document.getElementById('searchSite').value.trim().toLowerCase(),grouped={};events.filter(Boolean).forEach(e=>{const s=e.siteHost||'site-desconhecido';(grouped[s]??=[]).push(e)});const sites=Object.entries(grouped).filter(([s])=>!q||s.toLowerCase().includes(q)).sort((a,b)=>latest(b[1])-latest(a[1]));if(!sites.length){/* FIX: title, stats and "Limpar site" stayed visible after clearing */selectedSite=q?selectedSite:null;document.getElementById('siteList').innerHTML='<div class="empty">Sem histórico.</div>';document.getElementById('historyEvents').innerHTML='';document.getElementById('historyStats').innerHTML='';document.getElementById('historySiteTitle').textContent='Histórico';document.getElementById('historySiteMeta').textContent=q?'Nenhum site corresponde à busca.':'Selecione um site.';document.getElementById('clearSite').classList.add('hidden');return;}if(!selectedSite||!grouped[selectedSite])selectedSite=sites[0][0];document.getElementById('siteList').innerHTML=sites.map(([s,l])=>`<div class="siteItem ${s===selectedSite?'active':''}" data-site="${attr(s)}"><div class="siteTop"><div class="siteHost">${esc(s)}</div><div class="siteCount">${l.length}</div></div><div class="siteMeta">${friendlyDate(latest(l))}</div></div>`).join('');document.querySelectorAll('.siteItem').forEach(el=>el.addEventListener('click',()=>{selectedSite=el.dataset.site;renderHistory();}));const list=grouped[selectedSite]||[];document.getElementById('historySiteTitle').textContent=selectedSite;document.getElementById('historySiteMeta').textContent=`${list.length} eventos • último ${friendlyDate(latest(list))}`;document.getElementById('clearSite').classList.remove('hidden');const c={all:list.length,ga4:list.filter(x=>x.platform==='GA4').length,meta:list.filter(x=>x.platform==='Meta').length,dl:list.filter(x=>x.type==='datalayer').length};document.getElementById('historyStats').innerHTML=mini(c.all,'Eventos')+mini(c.ga4,'GA4')+mini(c.meta,'Meta')+mini(c.dl,'Data Layer');const rows=list.slice().sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));document.getElementById('historyEvents').innerHTML='<div class="historyRow header"><div>Hora</div><div>Plataforma</div><div>Evento</div><div>ID / Tag</div><div>Status</div></div>'+rows.map(e=>`<div class="historyRow"><div>${timeText(e.timestamp)}</div><div>${esc(e.type==='datalayer'?'Data Layer':e.platform)}</div><div><b>${esc(e.eventName||'-')}</b></div><div>${esc(e.trackingId||e.conversionId||'-')}</div><div>${esc(e.status??'-')}</div></div>`).join('');}
 function mini(v,l){return `<div class="miniStat"><strong>${v}</strong><span>${l}</span></div>`;}function latest(l){return Math.max(0,...l.map(e=>Number(e.timestamp)||0));}function friendlyDate(ts){if(!ts)return'';const d=new Date(ts),n=new Date();return d.toDateString()===n.toDateString()?`Hoje, ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`:d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}function normalize(v){return String(v||'').trim().toLowerCase();}function shortPlatform(p){return p==='Google Ads'?'Ads':p==='Floodlight'?'FL':p||'?';}function platformClass(p){return String(p||'').toLowerCase().replaceAll(' ','');}function first(v){return Array.isArray(v)?(v[0]??''):v;}function timeText(ts){const d=new Date(Number(ts)||Date.now());return d.toLocaleTimeString('pt-BR',{hour12:false})+'.'+String(d.getMilliseconds()).padStart(3,'0');}function statusBadge(s, errorMessage=""){
   const meta = statusInfo(s, errorMessage);
   return `<span class="status ${meta.cls}" data-status-tooltip="${attr(meta.tooltip)}">${esc(meta.label)}</span>`;
@@ -184,7 +192,7 @@ if(aiTest){
     try{
       const base=new URL(endpoint);
       const health=new URL("/health",base.origin).toString();
-      const res=await fetch(health,{method:"GET"});
+      const res=await fetch(health,{method:"GET",signal:AbortSignal.timeout(5000)});
       if(!res.ok)throw new Error(`HTTP ${res.status}`);
       const healthData=await res.json();
       if(!healthData.apiKeyConfigured){
@@ -318,13 +326,11 @@ async function analyzeEventById(eventId){
         method:"POST",
         headers:{
           "Content-Type":"application/json",
-          "X-Ventus-Version":"4.5.0"
+          "X-Ventus-Version":chrome.runtime.getManifest().version
         },
         body:JSON.stringify({tag:technicalPayload}),
         signal:controller.signal
-      });
-
-      clearTimeout(timer);
+      }).finally(()=>clearTimeout(timer));
 
       if(!response.ok){
         let msg="";
@@ -375,9 +381,7 @@ async function checkAiConnection(){
     const response=await fetch(health,{
       method:"GET",
       signal:controller.signal
-    });
-
-    clearTimeout(timer);
+    }).finally(()=>clearTimeout(timer));
 
     if(!response.ok)throw new Error(`HTTP ${response.status}`);
 
@@ -398,7 +402,16 @@ function updateAiConnection(state,text){
   const badge=document.getElementById("aiConnection");
   if(!badge)return;
   badge.className=`aiConnection ${state}`;
-  badge.textContent=text;
+  badge.title=text;
+  /* FIX: textContent erased the .aiConnectionDot/.aiConnectionText spans from v5.3,
+     so the pill lost its indicator and layout after the first health check. */
+  let dot=badge.querySelector(".aiConnectionDot");
+  let label=badge.querySelector(".aiConnectionText");
+  if(!dot||!label){
+    badge.innerHTML='<span class="aiConnectionDot" aria-hidden="true"></span><span class="aiConnectionText"></span>';
+    label=badge.querySelector(".aiConnectionText");
+  }
+  label.textContent=text;
 }
 
 setTimeout(checkAiConnection,250);
@@ -414,8 +427,11 @@ function sanitizeForAI(value,key=""){
   ];
 
   const lower=String(key||"").toLowerCase();
+  /* FIX: Meta/Google Ads user data uses short keys (em, ph, fn, ln, ud[em], user_data.em...) */
+  const shortKeys=["em","ph","fn","ln","db","ge","ct","st","zp","external_id"];
+  const leaf=lower.replace(/\]$/,"").split(/[.\[]/).pop();
 
-  if(blockedKeys.some(k=>lower===k||lower.endsWith(`.${k}`)||lower.includes(k))){
+  if(blockedKeys.some(k=>lower===k||lower.endsWith(`.${k}`)||lower.includes(k))||shortKeys.includes(leaf)){
     return "[REDACTED]";
   }
 
@@ -558,12 +574,13 @@ function applyVentusPowerState(enabled){
   if(ventusPowerLabel)ventusPowerLabel.textContent=enabled?"Ligado":"Desligado";
   document.body.classList.toggle("ventusPaused",!enabled);
   const monitor=document.querySelector(".monitor");
-  if(monitor)monitor.innerHTML=enabled?'<span class="dot"></span>Monitorando':'<span class="dot"></span>Captura pausada';
+  /* FIX: innerHTML removed the .monitorText span used by the responsive header CSS */
+  if(monitor)monitor.innerHTML=`<span class="dot"></span><span class="monitorText">${enabled?'Monitorando':'Captura pausada'}</span>`;
 }
-chrome.runtime.sendMessage({type:"VENTUS_GET_ENABLED"},r=>applyVentusPowerState(r?.enabled!==false));
+chrome.runtime.sendMessage({type:"VENTUS_GET_ENABLED"},r=>{if(chrome.runtime.lastError)return;applyVentusPowerState(r?.enabled!==false);});
 if(ventusPowerToggle){
   ventusPowerToggle.addEventListener("change",()=>{
-    chrome.runtime.sendMessage({type:"VENTUS_SET_ENABLED",enabled:ventusPowerToggle.checked},r=>applyVentusPowerState(r?.enabled!==false));
+    const wanted=ventusPowerToggle.checked;chrome.runtime.sendMessage({type:"VENTUS_SET_ENABLED",enabled:wanted},r=>{if(chrome.runtime.lastError){applyVentusPowerState(!wanted);return;}applyVentusPowerState(r?.enabled!==false);});
   });
 }
 chrome.runtime.onMessage.addListener(m=>{if(m?.type==="VENTUS_ENABLED_CHANGED")applyVentusPowerState(m.enabled!==false);});
@@ -640,8 +657,9 @@ function buildStatusCopyText(event) {
     lines.push(`Endpoint: ${(event.host || "") + (event.path || "")}`);
   }
 
-  if (event.gtmContainer) {
-    lines.push(`GTM: ${event.gtmContainer}`);
+  const gtmContainer = event.gtmContainer || getGtmContainer(event.siteHost, event.timestamp);
+  if (gtmContainer) {
+    lines.push(`GTM: ${gtmContainer}`);
   }
 
   if (event.transport) {
@@ -698,7 +716,9 @@ function applyVentusTheme(theme){
   document.documentElement.setAttribute("data-theme",selected);
 
   if(ventusThemeIcon){
-    ventusThemeIcon.textContent=selected==="dark"?"☀":"☾";
+    ventusThemeIcon.innerHTML=selected==="dark"
+      ?'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+      :'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>';
   }
 
   if(ventusThemeToggle){

@@ -1,6 +1,14 @@
-body{margin:0;font:12px Arial;background:#f5f7fb;color:#132238}
-header{height:54px;background:#0d1c32;color:#fff;display:flex;align-items:center;gap:9px;padding:0 12px}
-header img{width:34px;height:34px;border-radius:8px}header b{display:block}header span{font-size:10px;color:#aab7ca}
-#search{width:calc(100% - 20px);margin:10px;padding:8px;border:1px solid #dbe2ec;border-radius:6px}
-table{width:100%;border-collapse:collapse;background:white}th,td{padding:7px;border-bottom:1px solid #e9edf3;text-align:left}
-th{position:sticky;top:0;background:#eef2f6}
+:root{--bg:#f3f6fb;--surface:#fff;--border:#e3e9f1;--text:#0f1b2d;--muted:#6b7b92;--brand:#2563eb;--head:#06101f;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#070e1a;--surface:#0d1727;--border:#1d2c43;--text:#e9f0fa;--muted:#8c9db4;--brand:#5b9bff;--head:#040a14}}
+*{box-sizing:border-box}
+body{margin:0;font:12px/1.4 Inter,system-ui,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{height:48px;background:linear-gradient(180deg,#0b1b33,var(--head));color:#fff;display:flex;align-items:center;gap:9px;padding:0 12px;position:sticky;top:0;z-index:2}
+header img{width:28px;height:28px;border-radius:8px}header b{display:block;font-size:13px}header span{font-size:10px;color:#9fb0c8}
+#search{width:calc(100% - 20px);margin:10px;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none}
+#search:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 25%,transparent)}
+table{width:100%;border-collapse:collapse;background:var(--surface)}
+th,td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+td:nth-child(1),td:nth-child(6),td:nth-child(7){font-family:var(--mono);font-size:11px;color:var(--muted)}
+td:nth-child(5){font-weight:700}
+tr:hover td{background:color-mix(in srgb,var(--brand) 6%,var(--surface))}
+th{position:sticky;top:48px;background:var(--surface);color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em}

@@ -1,13 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Ventus Tag Debugger",
-  "version": "5.3.0",
+  "version": "5.5.1",
   "description": "Debugger visual de tags, GTM, Network e DataLayer com histórico por site.",
   "permissions": [
     "alarms",
-    "downloads",
     "storage",
-    "tabs",
+    "unlimitedStorage",
     "webRequest"
   ],
   "host_permissions": [
@@ -39,19 +38,20 @@
         "<all_urls>"
       ],
       "js": [
+        "injected.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
         "content.js"
       ],
       "run_at": "document_start"
     }
   ],
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "injected.js"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
-    }
-  ]
+  "minimum_chrome_version": "111"
 }

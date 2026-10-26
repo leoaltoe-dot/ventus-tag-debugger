@@ -1,8 +1,7 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Ventus Tag Debugger</title><link rel="stylesheet" href="popup.css"></head><body>
+<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Ventus Tag Debugger</title><meta name="color-scheme" content="light dark"><link rel="stylesheet" href="popup.css"></head><body>
 <header class="topbar">
   <div class="topbarLeft">
     <div class="monitor"><span class="dot"></span><span class="monitorText">Monitorando</span></div>
-
     <label class="ventusPower" title="Ligar ou desligar a captura">
       <input id="ventusPowerToggle" type="checkbox" checked>
       <span class="ventusPowerTrack"><span class="ventusPowerThumb"></span></span>
@@ -24,22 +23,30 @@
 
   <div class="topbarRight">
     <div class="topbarActions">
-      <button id="themeToggle" class="themeToggle" type="button" title="Mudar para modo escuro" aria-label="Mudar para modo escuro">
-        <span id="themeIcon">☾</span>
-      </button>
-      <button id="aiSettings" class="aiSettingsBtn" type="button" title="Configurar IA" aria-label="Configurar IA">⚙</button>
       <span id="aiConnection" class="aiConnection offline" title="Status da IA">
         <span class="aiConnectionDot" aria-hidden="true"></span>
         <span class="aiConnectionText">IA offline</span>
       </span>
-      <button id="clear" class="clearBtn" type="button" title="Limpar histórico" aria-label="Limpar histórico">🗑</button>
+      <button id="themeToggle" class="iconBtn themeToggle" type="button" title="Mudar para modo escuro" aria-label="Mudar para modo escuro">
+        <span id="themeIcon" class="icon"></span>
+      </button>
+      <button id="aiSettings" class="iconBtn aiSettingsBtn" type="button" title="Configurar IA" aria-label="Configurar IA">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+      </button>
+      <button id="clear" class="iconBtn clearBtn" type="button" title="Limpar histórico" aria-label="Limpar histórico">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </button>
     </div>
   </div>
 </header>
-<nav class="mainTabs"><button class="mainTab active" data-view="eventsView">⌁ Eventos</button><button class="mainTab" data-view="dlView">▱ Data Layer</button><button class="mainTab" data-view="historyView">◷ Histórico</button></nav>
-<section id="eventsView" class="view active"><div class="eventWorkspace"><aside class="leftPane"><div id="stats" class="stats"></div><div class="searchWrap"><input id="searchLive" placeholder="Buscar evento, ID ou URL..."></div><div class="filters"><button class="filter active" data-filter="ALL">Todos</button><button class="filter" data-filter="GA4">GA4</button><button class="filter" data-filter="Meta">Meta</button><button class="filter" data-filter="Google Ads">Google Ads</button><button class="filter" data-filter="Floodlight">Floodlight</button><button class="filter" data-filter="GTM">GTM</button><button class="filter" data-filter="TikTok">TikTok</button><button class="filter" data-filter="Server Side">Server Side</button></div><div id="liveEvents" class="eventList"></div></aside><section id="detailPanel" class="detailPanel emptyDetail"><div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div></section></div></section>
-<section id="dlView" class="view"><div class="standaloneHead"><div><h2>Data Layer</h2><p>Eventos capturados em tempo real.</p></div><input id="searchDL" placeholder="Buscar event, transaction_id, item_id..."></div><div id="dlEvents" class="standaloneList"></div></section>
-<section id="historyView" class="view"><div class="historyLayout"><aside class="sitePane"><div class="sitePaneTitle">Sites capturados</div><input id="searchSite" placeholder="Buscar site..."><div id="siteList"></div></aside><section class="historyContent"><div class="historyHeader"><div><h2 id="historySiteTitle">Histórico</h2><p id="historySiteMeta">Selecione um site.</p></div><button id="clearSite" class="historyClear hidden">Limpar site</button></div><div id="historyStats" class="historyStats"></div><div id="historyEvents" class="historyTable"></div></section></div></section>
+<nav class="mainTabs">
+  <button class="mainTab active" data-view="eventsView">Eventos <span class="tabCount" id="tabCountEvents">0</span></button>
+  <button class="mainTab" data-view="dlView">Data Layer <span class="tabCount" id="tabCountDL">0</span></button>
+  <button class="mainTab" data-view="historyView">Histórico <span class="tabCount" id="tabCountSites">0</span></button>
+</nav>
+<section id="eventsView" class="view active"><div class="eventWorkspace"><aside class="leftPane"><div id="stats" class="stats"></div><div class="searchWrap"><input id="searchLive" type="search" placeholder="Buscar evento, ID ou URL…"></div><div class="filters"><button class="filter active" data-filter="ALL">Todos</button><button class="filter" data-filter="GA4">GA4</button><button class="filter" data-filter="Meta">Meta</button><button class="filter" data-filter="Google Ads">Google Ads</button><button class="filter" data-filter="Floodlight">Floodlight</button><button class="filter" data-filter="GTM">GTM</button><button class="filter" data-filter="TikTok">TikTok</button><button class="filter" data-filter="Server Side">Server Side</button></div><div id="liveEvents" class="eventList"></div></aside><section id="detailPanel" class="detailPanel emptyDetail"><div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div></section></div></section>
+<section id="dlView" class="view"><div class="standaloneHead"><div><h2>Data Layer</h2><p>Eventos capturados em tempo real.</p></div><input id="searchDL" type="search" placeholder="Buscar event, transaction_id, item_id…"></div><div id="dlEvents" class="standaloneList"></div></section>
+<section id="historyView" class="view"><div class="historyLayout"><aside class="sitePane"><div class="sitePaneTitle">Sites capturados</div><input id="searchSite" type="search" placeholder="Buscar site…"><div id="siteList"></div></aside><section class="historyContent"><div class="historyHeader"><div><h2 id="historySiteTitle">Histórico</h2><p id="historySiteMeta">Selecione um site.</p></div><button id="clearSite" class="historyClear hidden">Limpar site</button></div><div id="historyStats" class="historyStats"></div><div id="historyEvents" class="historyTable"></div></section></div></section>
 
   <div id="aiModal" class="aiModal hidden" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle">
     <div class="aiModalCard">
