@@ -8,7 +8,7 @@ function headers() {
   return {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, X-Ventus-Version",
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS"
   };
 }
@@ -21,17 +21,21 @@ function send(res, status, body) {
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let data = "";
+    let tooLarge = false;
 
     req.on("data", chunk => {
+      if (tooLarge) return;
       data += chunk;
 
       if (data.length > 1024 * 1024) {
+        tooLarge = true;
         reject(new Error("Payload muito grande."));
         req.destroy();
       }
     });
 
     req.on("end", () => {
+      if (tooLarge) return;
       try {
         resolve(data ? JSON.parse(data) : {});
       } catch {
@@ -185,12 +189,15 @@ async function callOpenAI(tag) {
 }
 
 const server = http.createServer(async (req, res) => {
+  /* FIX: "/health?x=1" ou "/analyze/" retornavam 404 */
+  const pathname = new URL(req.url, "http://localhost").pathname.replace(/\/+$/, "") || "/";
+
   if (req.method === "OPTIONS") {
     res.writeHead(204, headers());
     return res.end();
   }
 
-  if (req.method === "GET" && req.url === "/health") {
+  if (req.method === "GET" && pathname === "/health") {
     return send(res, 200, {
       ok: true,
       service: "Ventus AI",
@@ -199,7 +206,7 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  if (req.method === "POST" && req.url === "/analyze") {
+  if (req.method === "POST" && pathname === "/analyze") {
     try {
       const body = await readBody(req);
 
