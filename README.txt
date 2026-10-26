@@ -180,3 +180,47 @@ Código
 - "Limpar histórico" e "Limpar site" pedem confirmação (segundo clique em até 3 s).
 - Esc fecha modais e o detalhe.
 - Detecção: Google Ads view-through conversion, gtm.js servido por domínio próprio (server-side), evento e pixel do TikTok em payload JSON, chaves de corpos JSON disponíveis como parâmetros.
+
+VENTUS v5.7 — SERVER-SIDE (sGTM) VALIDADO E MELHORADO
+Detecção (validada em 19 cenários: sGTM 1ª/3ª parte, Stape, Cloud Run, Data Tag, loaders, diretos e falsos positivos)
+- GA4 via sGTM reconhecido em qualquer caminho (assinatura v=2 + G-ID + en/cid), inclusive Google tag gateway no domínio do site.
+- Parâmetros sst.* usados como sinal de server container.
+- Stape Data Tag (/data + event_name) e loaders do GTM em domínio próprio (gtm.js ou caminho customizado com id=GTM-).
+- Cada hit server-side informa: endpoint, 1ª ou 3ª parte (comparando domínio registrável com o do site), provedor (Stape, Cloud Run, App Engine, Addingwell, TAGGRS, Azure, Heroku, AWS) e os sinais que provaram o server-side.
+- Modo preview do sGTM detectado pelo header X-Gtm-Server-Preview.
+- Cookies first-party definidos pelo servidor (FPID, FPLC, FPGCL*, FPAU, FPGSID) detectados na resposta.
+- Possível duplicidade: mesmo evento GA4 enviado direto ao Google e ao server container em até 3 s.
+- Falsos positivos removidos: Mixpanel, Clarity, RudderStack, Segment, Amplitude, PostHog, Hotjar, Sentry, New Relic, Datadog e outras ferramentas que usam /track ou /collect.
+- Filtro "Server Side" agora mostra todo hit que passa por server container (GA4, Meta, Ads, GTM e Data Tag), não só os genéricos.
+Correções
+- Preflight CORS (OPTIONS) não vira mais um evento duplicado.
+- Redirecionamentos (HSTS, cadeia de conversão do Google Ads) não criam registros duplicados; os saltos ficam em "Redirecionamentos".
+- Valores de cookies nunca são armazenados: Cookie/Set-Cookie guardam só nomes e atributos (Domain, Max-Age, SameSite…).
+Interface
+- Selo "sGTM · 1ª/3ª parte" e alerta "duplicado?" nos cards; seção Server-side no detalhe com sinais, cookies, preview e recomendações.
+- Análise local da IA com regras de server-side (domínio de terceiros, duplicidade, preview, cookies FP).
+Backends de IA
+- Cloudflare Worker: só aceita chamadas de páginas chrome-extension:// (antes qualquer site podia usar o Worker público e consumir créditos da OpenAI). Para restringir ao ID da sua extensão, defina a variável ALLOWED_ORIGINS="chrome-extension://<ID>" no Worker.
+- Backend local: recusa origens que não sejam a extensão ou localhost.
+- Ambos: timeout de 30 s na OpenAI, resposta normalizada (score 0–100, severidades válidas) e prompt com regras de server-side.
+
+VENTUS v5.8 — VALIDAÇÃO DE TAGS (REGRAS + IA)
+- Novo validator.js: validação determinística de cada tag, roda localmente e sem backend.
+  GA4: Measurement ID, nome do evento (40 caracteres, caracteres válidos, prefixos/nomes reservados, evento recomendado escrito diferente, ex.: "Purchase"),
+       limites de parâmetros (nome 40 / valor 100), value (número, vírgula, texto), currency ISO 4217, value sem currency,
+       transaction_id, items (pr1…: item_id/item_name, preço), Data Layer × hit (value, currency, transaction_id, quantidade de items),
+       Consent Mode (gcs/gcd) e DebugView.
+  Meta: Pixel ID, evento padrão escrito diferente (ex.: "purchase"), Purchase sem value/currency, event_id para deduplicação com CAPI,
+        content_ids para catálogo, _fbp.
+  Google Ads: Conversion ID, label, value/currency_code, transaction_id (oid). Floodlight: src, type, cat, ord/num. TikTok: pixel code, event_id.
+  Geral: entrega (erro/4xx/5xx), evento duplicado (mesmo transaction_id disparado mais de uma vez), contagem dupla direto + sGTM, sGTM de terceiros.
+- Cada tag mostra no card um selo (✓ ou ⚠ N) e o detalhe abre com o bloco "Validação da tag" (score e principais problemas).
+- Janela de análise: score colorido, problemas com severidade, parâmetro e "Como corrigir", checklist da tag, itens corretos, "Copiar relatório".
+- IA: recebe as checagens das regras (ruleValidation) como fatos e acrescenta só o que as regras não cobrem; achados repetidos são filtrados.
+  O resultado das regras aparece na hora; a IA completa quando responde. Respostas da IA ficam em cache e há "Reanalisar com IA".
+- Score local mais justo: GTM não identificado e Data Layer não correlacionado deixaram de penalizar como "médio" toda tag.
+- Backends: prompt com as regras de validação; resposta normalizada inclui fix e param.
+
+VENTUS v5.9 — ÍCONES DAS MÍDIAS
+- Ícone por plataforma (GA4, Meta, Google Ads, Floodlight, GTM, TikTok, Server Side, Data Layer) nos cards, no cabeçalho do detalhe, nos filtros e no histórico, na cor de cada mídia.
+- Ícones genéricos que representam a função de cada mídia (gráfico, público, megafone, lâmpada, etiqueta, vídeo, servidor, camadas); não são os logotipos oficiais das marcas.

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Ventus Tag Debugger",
-  "version": "5.6.0",
+  "version": "5.9.0",
   "description": "Debugger visual de tags, GTM, Network e DataLayer com histórico por site.",
   "permissions": [
     "alarms",
