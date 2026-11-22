@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "mona sans",
+        "createdAt": "2026-11-22T01:56:53.678Z",
+        "reason": "Claude, per user's brief: user asked Taste Skill to set the visual direction; its developer-tool deal picked Mona Sans"
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist mono",
+        "createdAt": "2026-11-22T01:56:53.684Z",
+        "reason": "Claude, per user's brief: Taste Skill developer-tool deal paired Geist Mono for data text only"
+      }
+    ]
+  }
+}
