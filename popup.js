@@ -1,3 +1,13 @@
+/* v6.0 — ícones desenhados (SVG) no lugar de glifos unicode (⧉ ✦ × ✓ ⚠) */
+const ICON={
+  copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H15"/></svg>',
+  check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  x:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  spark:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>',
+  warn:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>',
+  arrow:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>',
+  alert:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v4.5M12 15.8h.01"/></svg>'
+};
 let events=[];let liveFilter='ALL';let selectedEventId=null;let selectedDetailTab='summary';let selectedSite=null;
 const IMPORTANT_KEYS=new Set(['event','event_name','transaction_id','value','currency','item_id','item_name','item_brand','item_category','item_variant','source','medium','campaign','utm_source','utm_medium','utm_campaign','gclid','client_id','user_id','id','ev','tid','en']);
 function load(){chrome.runtime.sendMessage({type:'VENTUS_GET_EVENTS'},r=>{if(chrome.runtime.lastError)return;events=Array.isArray(r?.events)?r.events.filter(Boolean):[];if(selectedEventId&&!events.some(e=>e.id===selectedEventId))selectedEventId=null;scheduleRender();});}load();
@@ -21,7 +31,7 @@ function renderAll(){renderCounts();const v=activeView();if(v==='eventsView'){re
 /* v5.6: the stats row is now a STATUS filter (Todos / OK / Erros / Pendentes); platform counts live on the platform chips. */
 let statusFilter='ALL';
 function statusClassOf(e){return statusInfo(e.status,e.error||'').cls;}
-function renderStats(){const n=events.filter(e=>e.type==='network');const c={ALL:n.length,ok:0,error:0,pending:0};n.forEach(e=>{c[statusClassOf(e)]=(c[statusClassOf(e)]||0)+1;});document.getElementById('stats').innerHTML=stat('ALL',c.ALL,'Eventos')+stat('ok',c.ok,'Sucesso')+stat('error',c.error,'Erros')+stat('pending',c.pending,'Pendentes');
+function renderStats(){const n=events.filter(e=>e.type==='network');const c={ALL:n.length,ok:0,error:0,pending:0};n.forEach(e=>{c[statusClassOf(e)]=(c[statusClassOf(e)]||0)+1;});document.getElementById('stats').innerHTML=stat('ALL',c.ALL,'Todos')+stat('ok',c.ok,'OK')+stat('error',c.error,'Erros')+stat('pending',c.pending,'Pendentes');
   const byPlatform={};n.forEach(e=>{byPlatform[e.platform]=(byPlatform[e.platform]||0)+1;});byPlatform['Server Side']=n.filter(isSS).length;document.querySelectorAll('.filter').forEach(btn=>{const f=btn.dataset.filter;const v=f==='ALL'?n.length:(byPlatform[f]||0);if(f!=='ALL'&&!btn.querySelector('.pIco')&&PLATFORM_ICONS[f])btn.insertAdjacentHTML('afterbegin',`<span class="fIco ${platformClass(f)}">${pIcon(f)}</span>`);let b=btn.querySelector('.filterCount');if(!b){b=document.createElement('span');b.className='filterCount';btn.appendChild(b);}b.textContent=v;btn.classList.toggle('isEmpty',f!=='ALL'&&!v);});}
 function stat(key,v,l){return `<button type="button" class="stat ${key==='ALL'?'all':key} ${statusFilter===key?'active':''}" data-status-filter="${key}"><span class="v">${v}</span><span class="l">${l}</span></button>`;}
 document.getElementById('stats').addEventListener('click',ev=>{const b=ev.target.closest('[data-status-filter]');if(!b)return;statusFilter=b.dataset.statusFilter===statusFilter&&statusFilter!=='ALL'?'ALL':b.dataset.statusFilter;renderStats();renderLive();});
@@ -60,13 +70,13 @@ function card(e){const cls=platformClass(e.platform),p=e.allParams||{},gtm=getGt
     </div></div>
   ${ch?`<div class="chips">${ch}</div>`:''}
   <div class="cardFoot"><span class="cardEndpoint" title="${attr((e.method||'')+' '+(e.host||'')+(e.path||''))}"><b>${esc(e.method||'')}</b>${d!==null?` <i>${d} ms ·</i>`:''} ${esc(e.path||'')}</span>
-    <div class="cardActions"><button class="copyStatusBtn" type="button" data-copy-status-id="${attr(e.id)}" title="Copiar status/erro">⧉</button><button class="aiTagBtn" type="button" data-ai-event-id="${attr(e.id)}" title="Analisar com IA">✦ Analisar</button></div></div>
+    <div class="cardActions"><button class="copyStatusBtn" type="button" data-copy-status-id="${attr(e.id)}" title="Copiar status/erro" aria-label="Copiar status/erro">${ICON.copy}</button><button class="aiTagBtn" type="button" data-ai-event-id="${attr(e.id)}" title="Analisar com IA">${ICON.spark}<span>Analisar</span></button></div></div>
 </article>`;}
 function chips(e,p){/* v5.6: event_name/endpoint/method were duplicated in the title and footer */const items=p.items||p['ep.items'];const vals=[['transaction_id',p['ep.transaction_id']||p.transaction_id||p.order_id],['value',p['ep.value']||p.value||p['cd[value]']],['currency',p['ep.currency']||p.currency||p['cd[currency]']],['label',e.conversionLabel],['items',Object.keys(p).filter(k=>/^pr\d+$/.test(k)).length||null]].filter(([,v])=>v!==undefined&&v!==null&&v!=='');return vals.map(([k,v])=>`<span class="chip" title="${attr(k+': '+first(v))}"><b>${esc(k)}</b><span>${esc(first(v))}</span></span>`).join('');}
 /* FIX: the detail panel was rebuilt on every new event, resetting its scroll while the
    user was reading. It is only rebuilt when the selected event/tab actually changes. */
 let detailSignature='';
-function renderDetail(force=false){const panel=document.getElementById('detailPanel'),e=events.find(x=>x.id===selectedEventId);const sig=e?[e.id,selectedDetailTab,e.status,e.completedAt,Object.keys(e.requestHeaders||{}).length,Object.keys(e.responseHeaders||{}).length,dlSig(e),getGtmContainer(e.siteHost,e.timestamp),(e.serverSide?.cookies||[]).join(','),e.serverSide?.preview,dualSendOf(e)?.id||''].join('|'):'none';if(!force&&sig===detailSignature)return;detailSignature=sig;if(!e){panel.className='detailPanel emptyDetail';panel.innerHTML='<div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div>';return;}panel.className='detailPanel';const dl=correlateDataLayer(e),gtm=getGtmContainer(e.siteHost,e.timestamp),duration=durationOf(e);panel.innerHTML=`<div class="detailHeader"><div class="detailTop"><div class="detailBadge ${platformClass(e.platform)}" title="${attr(e.platform)}">${pIcon(e.platform)}</div><div class="detailTitleBlock"><div class="detailPlatform">${esc(e.platform)}</div><div class="detailTitle" title="${attr(e.eventName||'Request')}">${esc(e.eventName||'Request')}</div></div><button class="aiDetailBtn" id="aiDetailBtn" data-ai-event-id="${attr(e.id)}" type="button">✦ Analisar com IA</button><button class="detailClose" id="detailClose" title="Fechar (Esc)">×</button></div><div class="detailMetaRow">${(e.trackingId||e.conversionId)?`<span class="metaChip mono" title="Measurement / Pixel ID">${esc(e.trackingId||e.conversionId)}</span>`:''}${gtm?`<span class="metaChip via" title="Container GTM">${esc(gtm)}</span>`:''}${isSS(e)?`<span class="ssBadge ${e.serverSide?.party||''}">sGTM${e.serverSide?.party?' · '+partyLabel(e.serverSide):''}${e.serverSide?.provider?' · '+esc(e.serverSide.provider):''}</span>`:''}${dualSendOf(e)?'<span class="warnBadge">possível duplicidade</span>':''}<span class="metaChip mono">${timeText(e.timestamp)}</span>${duration!==null?`<span class="metaChip mono">${duration} ms</span>`:''}${statusBadge(e.status,e.error||'')}</div></div><div class="detailTabs">${detailTab('summary','Resumo')}${detailTab('datalayer','Data Layer')}${detailTab('params','Parâmetros')}${detailTab('headers','Headers')}${detailTab('response','Resposta')}${detailTab('timeline','Timeline')}</div><div class="detailBody"><section class="detailSection ${selectedDetailTab==='summary'?'active':''}">${summaryHtml(e,dl,gtm,duration)}</section><section class="detailSection ${selectedDetailTab==='datalayer'?'active':''}">${blockTitle('Evento Data Layer associado',dl?JSON.stringify(dl.data,null,2):'')}<div class="codeBox">${dl?renderObject(dl.data):'Nenhum Data Layer correspondente encontrado.'}</div></section><section class="detailSection ${selectedDetailTab==='params'?'active':''}">${kvTable('Query String',e.queryParams)}${kvTable('Body / POST',e.bodyParams)}${kvTable('Parâmetros combinados',e.allParams)}</section><section class="detailSection ${selectedDetailTab==='headers'?'active':''}">${kvTable('Request Headers',e.requestHeaders)}${kvTable('Response Headers',e.responseHeaders)}</section><section class="detailSection ${selectedDetailTab==='response'?'active':''}"><div class="infoGrid">${infoStatus(e)}${info('Status line',e.statusLine||'-')}${info('Concluído em',e.completedAt?timeText(e.completedAt):'-')}${info('Erro',e.error||'-')}</div></section><section class="detailSection ${selectedDetailTab==='timeline'?'active':''}">${timelineHtml(e,dl,gtm)}</section></div>`;const closeBtn=panel.querySelector('#detailClose');if(closeBtn){closeBtn.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();});closeBtn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();if(typeof ev.stopImmediatePropagation==='function')ev.stopImmediatePropagation();selectedEventId=null;selectedDetailTab='summary';detailSignature='none';document.querySelectorAll('.eventCard.selected').forEach(c=>c.classList.remove('selected'));panel.classList.remove('mobileOpen');panel.className='detailPanel emptyDetail';panel.innerHTML='<div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div>';});}panel.querySelectorAll('.detailTab').forEach(btn=>btn.addEventListener('click',()=>{selectedDetailTab=btn.dataset.tab;renderDetail(true);}));if(window.innerWidth<=620&&selectedEventId)panel.classList.add('mobileOpen');}
+function renderDetail(force=false){const panel=document.getElementById('detailPanel'),e=events.find(x=>x.id===selectedEventId);const sig=e?[e.id,selectedDetailTab,e.status,e.completedAt,Object.keys(e.requestHeaders||{}).length,Object.keys(e.responseHeaders||{}).length,dlSig(e),getGtmContainer(e.siteHost,e.timestamp),(e.serverSide?.cookies||[]).join(','),e.serverSide?.preview,dualSendOf(e)?.id||''].join('|'):'none';if(!force&&sig===detailSignature)return;detailSignature=sig;if(!e){panel.className='detailPanel emptyDetail';panel.innerHTML='<div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div>';return;}panel.className='detailPanel';const dl=correlateDataLayer(e),gtm=getGtmContainer(e.siteHost,e.timestamp),duration=durationOf(e);panel.innerHTML=`<div class="detailHeader"><div class="detailTop"><div class="detailBadge ${platformClass(e.platform)}" title="${attr(e.platform)}">${pIcon(e.platform)}</div><div class="detailTitleBlock"><div class="detailPlatform">${esc(e.platform)}</div><div class="detailTitle" title="${attr(e.eventName||'Request')}">${esc(e.eventName||'Request')}</div></div><button class="aiDetailBtn" id="aiDetailBtn" data-ai-event-id="${attr(e.id)}" type="button">${ICON.spark}<span>Analisar com IA</span></button><button class="detailClose" id="detailClose" title="Fechar (Esc)" aria-label="Fechar detalhe">${ICON.x}</button></div><div class="detailMetaRow">${(e.trackingId||e.conversionId)?`<span class="metaChip mono" title="Measurement / Pixel ID">${esc(e.trackingId||e.conversionId)}</span>`:''}${gtm?`<span class="metaChip via" title="Container GTM">${esc(gtm)}</span>`:''}${isSS(e)?`<span class="ssBadge ${e.serverSide?.party||''}">sGTM${e.serverSide?.party?' · '+partyLabel(e.serverSide):''}${e.serverSide?.provider?' · '+esc(e.serverSide.provider):''}</span>`:''}${dualSendOf(e)?'<span class="warnBadge">possível duplicidade</span>':''}<span class="metaChip mono">${timeText(e.timestamp)}</span>${duration!==null?`<span class="metaChip mono">${duration} ms</span>`:''}${statusBadge(e.status,e.error||'')}</div></div><div class="detailTabs">${detailTab('summary','Resumo')}${detailTab('datalayer','Data Layer')}${detailTab('params','Parâmetros')}${detailTab('headers','Headers')}${detailTab('response','Resposta')}${detailTab('timeline','Timeline')}</div><div class="detailBody"><section class="detailSection ${selectedDetailTab==='summary'?'active':''}">${summaryHtml(e,dl,gtm,duration)}</section><section class="detailSection ${selectedDetailTab==='datalayer'?'active':''}">${blockTitle('Evento Data Layer associado',dl?JSON.stringify(dl.data,null,2):'')}<div class="codeBox">${dl?renderObject(dl.data):'Nenhum Data Layer correspondente encontrado.'}</div></section><section class="detailSection ${selectedDetailTab==='params'?'active':''}">${kvTable('Query String',e.queryParams)}${kvTable('Body / POST',e.bodyParams)}${kvTable('Parâmetros combinados',e.allParams)}</section><section class="detailSection ${selectedDetailTab==='headers'?'active':''}">${kvTable('Request Headers',e.requestHeaders)}${kvTable('Response Headers',e.responseHeaders)}</section><section class="detailSection ${selectedDetailTab==='response'?'active':''}"><div class="infoGrid">${infoStatus(e)}${info('Status line',e.statusLine||'-')}${info('Concluído em',e.completedAt?timeText(e.completedAt):'-')}${info('Erro',e.error||'-')}</div></section><section class="detailSection ${selectedDetailTab==='timeline'?'active':''}">${timelineHtml(e,dl,gtm)}</section></div>`;const closeBtn=panel.querySelector('#detailClose');if(closeBtn){closeBtn.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();});closeBtn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();if(typeof ev.stopImmediatePropagation==='function')ev.stopImmediatePropagation();selectedEventId=null;selectedDetailTab='summary';detailSignature='none';document.querySelectorAll('.eventCard.selected').forEach(c=>c.classList.remove('selected'));panel.classList.remove('mobileOpen');panel.className='detailPanel emptyDetail';panel.innerHTML='<div class="emptyDetailText"><strong>Selecione um evento</strong><span>Clique em uma tag para ver Data Layer, GTM, parâmetros e timeline.</span></div>';});}panel.querySelectorAll('.detailTab').forEach(btn=>btn.addEventListener('click',()=>{selectedDetailTab=btn.dataset.tab;renderDetail(true);}));if(window.innerWidth<=620&&selectedEventId)panel.classList.add('mobileOpen');}
 function summaryHtml(e,dl,gtm,duration){return `${validationSummaryHtml(e)}<div class="infoGrid">${info('Plataforma',e.platform)}${infoStatus(e)}${info('Duração',duration!==null?duration+' ms':'-')}${info('Evento',e.eventName,'blue mono','wide')}${info('Pixel / Measurement ID',e.trackingId||e.conversionId||'-','blue mono')}${info('Endpoint',(e.method?e.method+' ':'')+(e.host||'')+(e.path||''),'mono','wide')}${(e.redirects||[]).length?info('Redirecionamentos',e.redirects.length+'× → '+(safeHost(e.redirects[e.redirects.length-1])),'mono','full'):''}${info('GTM Container',gtm||'Não identificado',gtm?'blue mono':'muted')}${isSS(e)?'':info('Transporte','Navegador → vendor (direto)','','full')}</div>${isSS(e)?serverSideHtml(e):''}${blockTitle('Data Layer relacionado',dl?JSON.stringify(dl.data,null,2):'')}<div class="codeBox">${dl?renderObject(dl.data):'Nenhum evento Data Layer correlacionado.'}</div>${blockTitle('Request (URL completa)',e.url||'')}<div class="urlBox">${esc(e.url||'')}</div>${timelineHtml(e,dl,gtm)}`;}
 /* v5.7: what the browser can prove about the server-side hop */
 function serverSideHtml(e){const ss=e.serverSide||{host:e.host,signals:[],cookies:[]};const dual=dualSendOf(e);
@@ -95,7 +105,7 @@ function correlateDataLayer(e){const ts=Number(e.timestamp)||0;const candidates=
 /* v5.6: GTM lookup is cached per render pass (it was a full scan for every card) */
 let gtmCache=null,gtmCacheLen=-1;function gtmIndex(){if(gtmCacheLen===events.length&&gtmCache)return gtmCache;gtmCache={};events.forEach(x=>{if(x.type==='network'&&x.platform==='GTM'&&/^GTM-/i.test(x.trackingId||''))(gtmCache[x.siteHost]??=[]).push(x);});Object.values(gtmCache).forEach(l=>l.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0)));gtmCacheLen=events.length;return gtmCache;}
 function getGtmContainer(siteHost,ts){const l=gtmIndex()[siteHost];if(!l)return '';const hit=l.find(x=>(x.timestamp||0)<=ts);return hit?.trackingId||'';}
-function timelineHtml(e,dl,gtm){const responseTs=e.completedAt||null;return `<div class="blockTitle">Timeline do evento</div><div class="timeline"><div class="step dl"><div class="stepDot">DL</div><div class="stepName">Data Layer</div><div class="stepMeta">${dl?timeText(dl.timestamp):'não correlacionado'}<br>${dl?esc(dl.eventName):''}</div></div><div class="step gtm"><div class="stepDot">G</div><div class="stepName">GTM</div><div class="stepMeta">${gtm?esc(gtm):'não identificado'}</div></div><div class="step"><div class="stepDot">↗</div><div class="stepName">${esc(e.platform)} Request</div><div class="stepMeta">${timeText(e.timestamp)}<br>${esc(e.path||'')}</div></div><div class="step response"><div class="stepDot">✓</div><div class="stepName">Resposta</div><div class="stepMeta">${responseTs?timeText(responseTs):'...'}<br>${esc(e.status??'-')}</div></div></div>`;}
+function timelineHtml(e,dl,gtm){const responseTs=e.completedAt||null;return `<div class="blockTitle">Timeline do evento</div><div class="timeline"><div class="step dl"><div class="stepDot">DL</div><div class="stepName">Data Layer</div><div class="stepMeta">${dl?timeText(dl.timestamp):'não correlacionado'}<br>${dl?esc(dl.eventName):''}</div></div><div class="step gtm"><div class="stepDot">G</div><div class="stepName">GTM</div><div class="stepMeta">${gtm?esc(gtm):'não identificado'}</div></div><div class="step"><div class="stepDot">${ICON.arrow}</div><div class="stepName">${esc(e.platform)} Request</div><div class="stepMeta">${timeText(e.timestamp)}<br>${esc(e.path||'')}</div></div><div class="step response"><div class="stepDot">${ICON.check}</div><div class="stepName">Resposta</div><div class="stepMeta">${responseTs?timeText(responseTs):'...'}<br>${esc(e.status??'-')}</div></div></div>`;}
 function renderDL(){const q=document.getElementById('searchDL').value.trim().toLowerCase();const all=events.filter(e=>e.type==='datalayer').filter(e=>!q||str(e).includes(q));const list=all.slice(-LIST_LIMIT).reverse();document.getElementById('dlEvents').innerHTML=list.length?list.map(e=>`<article class="eventCard dlCard"><div class="cardHead"><div class="platformIcon dl" title="Data Layer">${pIcon('DataLayer')}</div><div class="cardMain"><div class="cardMeta"><span class="cardPlatform">Data Layer · ${esc(e.source==='existing'?'já existente':'push')}</span><span class="time">${timeText(e.timestamp)}</span></div><div class="cardTitle" title="${attr(e.eventName||'dataLayer.push')}">${esc(e.eventName||'dataLayer.push')}</div><div class="cardIdRow"><span class="cardId" title="${attr(e.pageUrl||e.siteHost||'')}">${esc(e.siteHost||'')}</span><span class="grow"></span><button type="button" class="miniCopy" data-copy-text="${attr(JSON.stringify(e.data,null,2))}">Copiar JSON</button></div></div></div><div class="payload">${renderObject(e.data)}</div></article>`).join('')+(all.length>LIST_LIMIT?`<div class="listNote">Mostrando os ${LIST_LIMIT} mais recentes de ${all.length}.</div>`:''):'<div class="empty"><strong>Nenhum Data Layer capturado</strong><span>Os pushes de window.dataLayer aparecem aqui em tempo real.</span></div>';}
 function renderHistory(){const q=document.getElementById('searchSite').value.trim().toLowerCase(),grouped={};events.filter(Boolean).forEach(e=>{const s=e.siteHost||'site-desconhecido';(grouped[s]??=[]).push(e)});const sites=Object.entries(grouped).filter(([s])=>!q||s.toLowerCase().includes(q)).sort((a,b)=>latest(b[1])-latest(a[1]));if(!sites.length){/* FIX: title, stats and "Limpar site" stayed visible after clearing */selectedSite=q?selectedSite:null;document.getElementById('siteList').innerHTML='<div class="empty">Sem histórico.</div>';document.getElementById('historyEvents').innerHTML='';document.getElementById('historyStats').innerHTML='';document.getElementById('historySiteTitle').textContent='Histórico';document.getElementById('historySiteMeta').textContent=q?'Nenhum site corresponde à busca.':'Selecione um site.';document.getElementById('clearSite').classList.add('hidden');return;}if(!selectedSite||!grouped[selectedSite])selectedSite=sites[0][0];document.getElementById('siteList').innerHTML=sites.map(([s,l])=>`<div class="siteItem ${s===selectedSite?'active':''}" data-site="${attr(s)}"><div class="siteTop"><div class="siteHost" title="${attr(s)}">${esc(s)}</div><div class="siteCount">${l.length}</div></div><div class="siteMeta">${friendlyDate(latest(l))}</div></div>`).join('');document.querySelectorAll('.siteItem').forEach(el=>el.addEventListener('click',()=>{selectedSite=el.dataset.site;renderHistory();}));const list=grouped[selectedSite]||[];document.getElementById('historySiteTitle').textContent=selectedSite;document.getElementById('historySiteTitle').title=selectedSite;document.getElementById('historySiteMeta').textContent=`${list.length} eventos • último ${friendlyDate(latest(list))}`;document.getElementById('clearSite').classList.remove('hidden');const c={all:list.length,ga4:list.filter(x=>x.platform==='GA4').length,meta:list.filter(x=>x.platform==='Meta').length,dl:list.filter(x=>x.type==='datalayer').length};document.getElementById('historyStats').innerHTML=mini(c.all,'Eventos')+mini(c.ga4,'GA4')+mini(c.meta,'Meta')+mini(c.dl,'Data Layer');const rows=list.slice().sort((a,b)=>(b.timestamp||0)-(a.timestamp||0)).slice(0,500);document.getElementById('historyEvents').innerHTML='<div class="historyRow header"><div>Hora</div><div>Plataforma</div><div>Evento</div><div>ID / Tag</div><div>Status</div></div>'+rows.map(e=>{const pl=e.type==='datalayer'?'Data Layer':e.platform;const st=e.type==='datalayer'?'<span class="muted">—</span>':statusBadge(e.status,e.error||'');return `<div class="historyRow"><div>${timeText(e.timestamp)}</div><div><span class="platformMini ${e.type==='datalayer'?'dl':platformClass(e.platform)}">${pIcon(e.type==='datalayer'?'DataLayer':e.platform)}</span>${esc(pl)}</div><div title="${attr(e.eventName||'-')}"><b>${esc(e.eventName||'-')}</b></div><div title="${attr(e.trackingId||e.conversionId||'-')}">${esc(e.trackingId||e.conversionId||'-')}</div><div>${st}</div></div>`;}).join('')+(list.length>500?`<div class="listNote">Mostrando os 500 mais recentes de ${list.length}.</div>`:'');}
 function mini(v,l){return `<div class="miniStat"><strong>${v}</strong><span>${l}</span></div>`;}function latest(l){return Math.max(0,...l.map(e=>Number(e.timestamp)||0));}function friendlyDate(ts){if(!ts)return'';const d=new Date(ts),n=new Date();return d.toDateString()===n.toDateString()?`Hoje, ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`:d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}function normalize(v){return String(v||'').trim().toLowerCase();}function shortPlatform(p){return p==='Google Ads'?'Ads':p==='Floodlight'?'FL':p==='Server Side'?'SS':p==='DataLayer'?'DL':p||'?';}function platformClass(p){return String(p||'').toLowerCase().replaceAll(' ','');}function first(v){return Array.isArray(v)?(v[0]??''):v;}function timeText(ts){const d=new Date(Number(ts)||Date.now());return d.toLocaleTimeString('pt-BR',{hour12:false})+'.'+String(d.getMilliseconds()).padStart(3,'0');}function statusBadge(s, errorMessage=""){
@@ -341,7 +351,7 @@ function txKey(e){const p=e.allParams||{};const f=v=>Array.isArray(v)?v[0]:v;ret
 function duplicatesOf(e){const k=txKey(e);if(!k)return 0;return events.filter(x=>x!==e&&x.type==='network'&&x.platform===e.platform&&x.siteHost===e.siteHost&&normalize(x.eventName)===normalize(e.eventName)&&txKey(x)===k&&!isSS(x)===!isSS(e)).length;}
 const validationCache=new Map();
 function validationFor(e){if(!window.VentusValidator)return null;const sig=`${e.status}|${events.length}`;const c=validationCache.get(e.id);if(c&&c.sig===sig)return c.res;let res=null;try{res=VentusValidator.validateTag(tagFor(e),{duplicates:duplicatesOf(e)});}catch(err){console.warn('[Ventus] validação',err);}validationCache.set(e.id,{sig,res});if(validationCache.size>2000)validationCache.delete(validationCache.keys().next().value);return res;}
-function validationBadge(e){const v=validationFor(e);if(!v)return'';const n=v.counts.high+v.counts.medium;const cls=v.counts.high?'high':v.counts.medium?'medium':'ok';const tip=v.findings.filter(f=>f.severity==='high'||f.severity==='medium').slice(0,4).map(f=>'• '+f.title).join('\n')||'Nenhum problema encontrado pelas regras';return `<span class="valBadge ${cls}" title="${attr(tip)}">${n?`⚠ ${n}`:'✓'}</span>`;}
+function validationBadge(e){const v=validationFor(e);if(!v)return'';const n=v.counts.high+v.counts.medium;const cls=v.counts.high?'high':v.counts.medium?'medium':'ok';const tip=v.findings.filter(f=>f.severity==='high'||f.severity==='medium').slice(0,4).map(f=>'• '+f.title).join('\n')||'Nenhum problema encontrado pelas regras';return `<span class="valBadge ${cls}" title="${attr(tip)}">${n?`${ICON.warn}${n}`:ICON.check}</span>`;}
 function validationSummaryHtml(e){const v=validationFor(e);if(!v)return'';const issues=v.findings.filter(f=>f.severity!=='good');return `<div class="valSummary ${v.counts.high?'high':v.counts.medium?'medium':'ok'}"><div class="valScore">${v.score}</div><div class="valText"><strong>Validação da tag</strong><span>${esc(v.summary)}</span>${issues.length?`<ul>${issues.slice(0,3).map(f=>`<li class="${f.severity}">${esc(f.title)}</li>`).join('')}${issues.length>3?`<li class="more">+${issues.length-3} outro(s)</li>`:''}</ul>`:''}</div><button type="button" class="aiTagBtn" data-ai-event-id="${attr(e.id)}">Ver validação completa</button></div>`;}
 
 const aiCache=new Map();
@@ -484,7 +494,7 @@ function sanitizeForAI(value,key=""){
 function severityLabel(s){return s==="high"?"Crítico":s==="medium"?"Atenção":s==="low"?"Info":"OK";}
 function scoreClass(n){return n===null||n===undefined?"":n>=80?"good":n>=50?"medium":"high";}
 function findingHtml(f){return `<div class="aiFinding ${esc(f.severity||"low")}"><div class="aiFindingHead"><span class="sevPill ${esc(f.severity||"low")}">${severityLabel(f.severity)}</span><div class="aiFindingTitle">${esc(f.title||"Ponto identificado")}</div>${f.param?`<code class="aiParam">${esc(f.param)}</code>`:""}</div>${f.text?`<div class="aiFindingText">${esc(f.text)}</div>`:""}${f.fix?`<div class="aiFix"><b>Como corrigir:</b> ${esc(f.fix)}</div>`:""}</div>`;}
-function checksHtml(checks){if(!checks?.length)return"";return `<div class="aiSection"><h3>Checklist da tag</h3><div class="aiChecks">${checks.map(c=>`<div class="aiCheck ${esc(c.status)}"><span class="ckIcon">${c.status==="ok"?"✓":c.status==="error"?"✕":c.status==="warn"?"!":"i"}</span><span class="ckLabel">${esc(c.label)}</span><span class="ckValue" title="${attr(c.value)}">${esc(c.value)}</span>${c.note?`<span class="ckNote">${esc(c.note)}</span>`:""}</div>`).join("")}</div></div>`;}
+function checksHtml(checks){if(!checks?.length)return"";return `<div class="aiSection"><h3>Checklist da tag</h3><div class="aiChecks">${checks.map(c=>`<div class="aiCheck ${esc(c.status)}"><span class="ckIcon">${c.status==="ok"?ICON.check:c.status==="error"?ICON.x:c.status==="warn"?"!":"i"}</span><span class="ckLabel">${esc(c.label)}</span><span class="ckValue" title="${attr(c.value)}">${esc(c.value)}</span>${c.note?`<span class="ckNote">${esc(c.note)}</span>`:""}</div>`).join("")}</div></div>`;}
 function reportText(data,event){const r=data.rules;const lines=[`Ventus · validação de ${event.platform} · ${event.eventName}`,`Score (regras): ${r.score}/100 — ${r.summary}`];if(data.ai)lines.push(`Score (IA): ${data.ai.score??"-"} — ${data.ai.summary||""}`);lines.push("","Checklist:");r.checks.forEach(c=>lines.push(`- ${c.label}: ${c.value} [${c.status}]`));const all=[...r.findings,...(data.ai?.findings||[])].filter(f=>f.severity!=="good");if(all.length){lines.push("","Problemas:");all.forEach(f=>lines.push(`- (${severityLabel(f.severity)}) ${f.title}${f.text?": "+f.text:""}${f.fix?" → "+f.fix:""}`));}return lines.join("\n");}
 
 function renderAIAnalysis(data,event){
@@ -643,14 +653,16 @@ async function copyText(text) {
 function showCopyFeedback(button, message) {
   if (!button) return;
 
-  const original = button.dataset.originalLabel || button.textContent;
-  button.dataset.originalLabel = original;
-  button.textContent = message === "Copiado" ? "✓" : message === "Erro" ? "!" : "×";
+  /* v6.0: troca o SVG (o CSS faz a transição com blur curto) em vez de trocar glifos via textContent */
+  const original = button.dataset.originalHtml || button.innerHTML;
+  button.dataset.originalHtml = original;
+  button.innerHTML = message === "Copiado" ? ICON.check : message === "Erro" ? ICON.alert : ICON.x;
+  button.classList.remove("copied", "copyError");
   button.classList.add(message === "Copiado" ? "copied" : "copyError");
 
   clearTimeout(button._ventusCopyTimer);
   button._ventusCopyTimer = setTimeout(() => {
-    button.textContent = original || "⧉";
+    button.innerHTML = original || ICON.copy;
     button.classList.remove("copied", "copyError");
   }, 1200);
 }
@@ -662,7 +674,7 @@ const ventusThemeToggle=document.getElementById("themeToggle");
 const ventusThemeIcon=document.getElementById("themeIcon");
 
 function applyVentusTheme(theme){
-  const selected=theme==="dark"?"dark":"light";
+  const selected=theme==="light"?"light":"dark";
   document.documentElement.setAttribute("data-theme",selected);
 
   if(ventusThemeIcon){
@@ -682,14 +694,14 @@ function applyVentusTheme(theme){
 }
 
 chrome.storage.local.get(["ventusTheme"],result=>{
-  applyVentusTheme(result.ventusTheme==="dark"?"dark":"light");
+  applyVentusTheme(result.ventusTheme==="light"?"light":"dark"); /* v6.0: escuro é o padrão */
 });
 
 if(ventusThemeToggle){
   ventusThemeToggle.addEventListener("click",()=>{
-    const current=document.documentElement.getAttribute("data-theme")==="dark"
-      ? "dark"
-      : "light";
+    const current=document.documentElement.getAttribute("data-theme")==="light"
+      ? "light"
+      : "dark";
 
     const next=current==="dark"?"light":"dark";
 
@@ -715,3 +727,67 @@ document.addEventListener("keydown", ev => {
   if (open) { open.classList.add("hidden"); return; }
   document.getElementById("detailClose")?.click();
 });
+
+
+/* =========================================================
+   v6.0 — motion layer (princípios Emil Kowalski)
+   Tudo aqui é aditivo: envolve funções existentes sem mudar a lógica.
+   ========================================================= */
+(function ventusMotion(){
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  /* 1) Indicador único que desliza entre as abas principais (estado espacial, 240ms ease-out) */
+  const nav=document.querySelector(".mainTabs");
+  const indicator=nav?.querySelector(".tabIndicator");
+  function placeIndicator(){
+    if(!nav||!indicator)return;
+    const active=nav.querySelector(".mainTab.active");if(!active)return;
+    const n=nav.getBoundingClientRect(),a=active.getBoundingClientRect();
+    const inset=parseFloat(getComputedStyle(active).paddingLeft)||0;
+    indicator.style.setProperty("--x",(a.left-n.left+inset)+"px");
+    indicator.style.setProperty("--s",String(Math.max(0,a.width-inset*2)/100));
+  }
+  if(nav){
+    nav.addEventListener("click",ev=>{if(ev.target.closest(".mainTab"))requestAnimationFrame(placeIndicator);});
+    window.addEventListener("resize",placeIndicator);
+    document.fonts?.ready?.then(()=>{placeIndicator();requestAnimationFrame(()=>indicator?.classList.add("ready"));});
+    placeIndicator();
+  }
+  const _renderCounts=renderCounts;
+  renderCounts=function(){_renderCounts.apply(this,arguments);placeIndicator();};
+
+  /* 2) Evento recém-chegado: brilho lime que se apaga em ~1.1s.
+     O delay negativo mantém a animação contínua mesmo que a lista seja re-renderizada no meio. */
+  const arrivedAt=new Map();let primed=false;const ARRIVE_MS=1100;
+  const _renderLive=renderLive;
+  renderLive=function(){
+    _renderLive.apply(this,arguments);
+    const now=performance.now();
+    document.querySelectorAll("#liveEvents .eventCard[data-event-id]").forEach(el=>{
+      const id=el.dataset.eventId;
+      if(!arrivedAt.has(id)){arrivedAt.set(id,primed?now:-Infinity);}
+      const age=now-arrivedAt.get(id);
+      if(age<ARRIVE_MS){el.classList.add("isNew");el.style.animationDelay=(-age)+"ms";}
+    });
+    if(events.some(e=>e.type==="network"))primed=true;
+    if(arrivedAt.size>3000){const keep=[...arrivedAt].slice(-1500);arrivedAt.clear();keep.forEach(([k,v])=>arrivedAt.set(k,v));}
+  };
+
+  /* 3) Troca de evento no detalhe: entrada curta (160ms). Não anima troca de aba interna. */
+  let lastDetailId=null;
+  const _renderDetail=renderDetail;
+  renderDetail=function(){
+    _renderDetail.apply(this,arguments);
+    const panel=document.getElementById("detailPanel");
+    if(!panel)return;
+    if(selectedEventId&&selectedEventId!==lastDetailId&&!reduce.matches){
+      panel.classList.remove("swap");void panel.offsetWidth;panel.classList.add("swap");
+    }else if(!selectedEventId){panel.classList.remove("swap");}
+    lastDetailId=selectedEventId;
+  };
+  document.getElementById("detailPanel")?.addEventListener("animationend",ev=>{if(ev.target.classList?.contains("detailBody"))ev.currentTarget.classList.remove("swap");});
+
+  /* versão no rodapé da configuração */
+  const v=document.getElementById("ventusVersion");
+  try{if(v)v.textContent="v"+chrome.runtime.getManifest().version;}catch(_){}
+})();
